@@ -1,0 +1,24 @@
+<launch>
+
+  <arg name="use_teleop" default="false" />
+
+  <arg name="use_slam" default="true" />
+  <arg name="slam_methods" default="gmapping"/>
+
+
+  <arg name="map_file" default="" />
+
+  <!-- bringup the turtlebot in gazebo -->
+  <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch" />
+
+  <!-- use keyboard teleop -->
+  <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard"
+        output="screen" launch-prefix="xterm -e" if="$(arg use_teleop)" />
+
+
+  <!-- do slam to crate map and do localization at the same time -->
+  <include file="$(find turtlebot3_slam)/launch/turtlebot3_slam.launch" if="$(arg use_slam)">
+    <arg name="slam_methods" value="$(arg slam_methods)"/>
+  </include>
+
+</launch>
