@@ -34,8 +34,8 @@ class GasDistributer:
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
         # distribution rule:
-        dist = np.linalg.norm(self.gas_origin - pos )
-        val = self.max_val*math.exp**(dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time)) + self.time_rate_off)
+        dist = np.linalg.norm(self.gas_origin - pos)
+        val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off)
         # val = self.max_val - self.alpha *  dist**2
         self.gas_value_pub.publish(Float32(val))
 
