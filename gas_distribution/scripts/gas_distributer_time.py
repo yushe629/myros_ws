@@ -23,7 +23,9 @@ class GasDistributer:
         self.gas_value_pub = rospy.Publisher("/gas", Float32, queue_size=10)
         self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         # setting rosTime
-        self.default_time = rospy.Time.now()
+        self.start_time = rospy.Time.now()
+        self.time_rate_off = 1.0
+        self.time_rate = 1.0
         rospy.spin()
 
     def odom_callback(self, msg):
@@ -32,8 +34,8 @@ class GasDistributer:
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
         # distribution rule:
-        dist = np.linalg.norm(self.gas_origin - pos )
-        val = self.max_val*math.exp**(dist**2)
+        dist = np.linalg.norm(self.gas_origin - pos)
+        val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off)
         # val = self.max_val - self.alpha *  dist**2
         self.gas_value_pub.publish(Float32(val))
 
