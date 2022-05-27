@@ -37,14 +37,14 @@ class gas_explore:
         self.before_gas_value = 0.0
         self.gas_value = 0.0
         self.max_gas_value = 0.0
-        self.robot_position = None
+        self.robot_pose = None
         self.cmd_x = 0.0
         self.cmd_yaw = 0.0
         self.explore_state = 'front'
         self.iscorrect_path = True
         self.max_gas_value_time = rospy.Time()
         self.begin_time = rospy.Time.now()
-        self.max_gas_value_position = None
+        self.max_gas_value_pose = None
         self.gas_map_array = np.empty((0,3), np.float32)
         rospy.spin()
         # TODO How to use two or three subscribers
@@ -54,20 +54,20 @@ class gas_explore:
         return t - self.begin_time
 
     def odom_callback(self,msg):
-        # set Odometry.pose.pose.position
-        self.robot_position = msg.pose.pose.position
+        # set Odometry.pose.pose
+        self.robot_pose = msg.pose.pose
 
     def gas_callback(self, msg):
         self.before_gas_value = self.gas_value
         self.gas_value = msg.data
         # Add gas map date to gas_map_array
-        if self.robot_position != None:
-            self.gas_map_array = np.append(self.gas_map_array, [[self.robot_position.x, self.robot_position.y, msg.data]], axis=0)
+        if self.robot_pose != None:
+            self.gas_map_array = np.append(self.gas_map_array, [[self.robot_pose.position.x, self.robot_pose.position.y, msg.data]], axis=0)
 
         if msg.data > self.max_gas_value:
             self.max_gas_value = msg.data
             self.max_gas_value_time = self.time_now_in_node()
-            self.max_gas_value_position = self.robot_position
+            self.max_gas_value_pose = self.robot_pose
 
     def explore(self):
         if self.explore_state == 'front':
@@ -99,7 +99,7 @@ class gas_explore:
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
             goal = PoseStamped()
-            goal.pose.position = self.robot_position
+            goal.pose = self.robot_pose
             self.goal_pub.publish(goal)
             return
 
