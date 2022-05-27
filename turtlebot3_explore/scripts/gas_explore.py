@@ -61,7 +61,7 @@ class gas_explore:
         self.gas_value = msg.data
         # Add gas map date to gas_map_array
         if self.robot_position != None:
-            self.gas_map_array = np.append(self.gas_map_array, [self.robot_position.x, self.robot_position.y, msg.data], axis=0)
+            self.gas_map_array = np.append(self.gas_map_array, [[self.robot_position.x, self.robot_position.y, msg.data]], axis=0)
 
         if msg.data > self.max_gas_value:
             self.max_gas_value = msg.data
@@ -86,7 +86,7 @@ class gas_explore:
             rospy.sleep(explore_yaw_time)
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
-            self.explore_state == 'front'
+            self.explore_state = 'front'
 
     def callback(self, msg):
         # rospy.loginfo_throttle(1.0, "laser number: %d", len(msg.ranges))
