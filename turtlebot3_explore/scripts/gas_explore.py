@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+import imp
 import rospy
 import message_filters
 import math
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from std_msgs.msg import Float32
 from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
@@ -20,14 +21,14 @@ explore_time = 0.3
 explore_yaw_vel = 1.0
 explore_yaw_time = 0.3
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
-limit_time = 30
+limit_time = 15
 
 class gas_explore:
     def __init__(self):
 
         rospy.init_node("gas_explore")
         self.vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
-        self.goal_pub = rospy.Publisher("/move_base/goal", MoveBaseActionGoal, queue_size=10)
+        self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=10)
         self.scan_sub = rospy.Subscriber("/scan", LaserScan, self.callback)
         self.gas_value_sub = rospy.Subscriber("/gas", Float32, self.gas_callback)
         self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
@@ -92,15 +93,15 @@ class gas_explore:
         # rospy.loginfo_throttle(1.0, "laser number: %d", len(msg.ranges))
         last_sec = (self.time_now_in_node().to_sec() - self.max_gas_value_time.to_sec())
         rospy.loginfo_throttle(1.0,"last_time: %f",last_sec)
-        # if (last_sec  > limit_time):
-        #     rospy.loginfo_once("Robot discovered goal")
-        #     self.explore_state = "explored"
-        #     self.cmd_x = 0.0
-        #     self.cmd_yaw = 0.0
-        #     goal = MoveBaseActionGoal()
-        #     goal.goal.target_pose.pose.position = self.robot_position
-        #     self.goal_pub.publish(goal)
-        #     return
+        if (last_sec  > limit_time or self.explore_state == "explored"):
+            rospy.loginfo_once("Robot discovered goal")
+            self.explore_state = "explored"
+            self.cmd_x = 0.0
+            self.cmd_yaw = 0.0
+            goal = PoseStamped()
+            goal.pose.position = self.robot_position
+            self.goal_pub.publish(goal)
+            return
 
         #front_dist = msg.ranges[0]
         front_dists = msg.ranges[:20]+ msg.ranges[340:]
