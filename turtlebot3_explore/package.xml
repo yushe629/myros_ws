@@ -26,6 +26,7 @@
   <exec_depend>turtlebot3_teleop</exec_depend>
   <exec_depend>turtlebot3_gazebo</exec_depend>
   <exec_depend>turtlebot3_slam</exec_depend>
+  <exec_depend>turtlebot3_navigation</exec_depend>
   <exec_depend>amcl</exec_depend>
 
 </package>
