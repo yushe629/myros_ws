@@ -39,6 +39,8 @@ class gas_explore:
         self.before_gas_value = 0.0
         self.gas_value = 0.0
         self.max_gas_value = 0.0
+        self.goal_pose = PoseStamped()
+        self.goal_pose.header.frame_id = "map"
         self.robot_pose = None
         self.cmd_x = 0.0
         self.cmd_yaw = 0.0
@@ -120,17 +122,22 @@ class gas_explore:
             self.explore_state = 'front'
 
     def callback(self, msg):
+
+        if self.explore_state == "explored":
+            return
+
         # rospy.loginfo_throttle(1.0, "laser number: %d", len(msg.ranges))
         last_sec = (self.time_now_in_node().to_sec() - self.max_gas_value_time.to_sec())
         rospy.loginfo_throttle(1.0,"last_time: %f",last_sec)
-        if (last_sec  > limit_time or self.explore_state == "explored"):
-            rospy.loginfo_once("Robot discovered goal")
+        if last_sec  > limit_time:
+            rospy.logwarn_once("Robot discovered goal!")
             self.explore_state = "explored"
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
-            goal = PoseStamped()
-            goal.pose = self.robot_pose
-            self.goal_pub.publish(goal)
+            self.goal_pose.header.seq = self.goal_pose.header.seq + 1
+            self.goal_pose.header.stamp = rospy.Time.now()
+            self.goal_pose.pose = self.robot_pose
+            self.goal_pub.publish(self.goal_pose)
             return
 
         #front_dist = msg.ranges[0]
