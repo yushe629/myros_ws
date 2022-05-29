@@ -2,7 +2,7 @@
 
   <arg name="use_teleop" default="false" />
 
-  <arg name="use_slam" default="true" />
+  <arg name="use_slam" default="false" />
   <arg name="slam_methods" default="gmapping"/>
 
   <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
