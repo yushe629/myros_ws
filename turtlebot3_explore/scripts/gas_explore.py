@@ -71,7 +71,7 @@ class gas_explore:
 
         rospy.spin()
         # TODO How to use two or three subscribers
-    
+
     def time_now_in_node(self):
         t = rospy.Time.now()
         return t - self.begin_time
