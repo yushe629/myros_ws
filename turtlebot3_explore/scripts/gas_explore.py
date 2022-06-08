@@ -22,7 +22,7 @@ explore_time = 0.3
 explore_yaw_vel = 1.0
 explore_yaw_time = 0.3
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
-limit_time = 15
+limit_time = 30.0
 
 class gas_explore:
     def __init__(self):

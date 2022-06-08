@@ -14,7 +14,7 @@ class GasDistributer:
         rospy.init_node("gas_distributer_time")
 
         # gas source coordinate
-        self.gas_origin = rospy.get_param("gas_origin", [0,0,0])
+        self.gas_origin = rospy.get_param("gas_origin", [2.0,0.5,0])
         self.gas_origin = np.array(self.gas_origin)
         # setting constant
         self.alpha = rospy.get_param("~alpha", 1.0)
@@ -26,7 +26,7 @@ class GasDistributer:
         # setting rosTime
         self.start_time = rospy.Time.now()
         self.time_rate_off = 1.0
-        self.time_rate = 1.0
+        self.time_rate = 100.0
 
         self.gas_visual_map = OccupancyGrid()
         self.gas_visual_map.header.frame_id = "map"
@@ -51,7 +51,8 @@ class GasDistributer:
         # dist = np.linalg.norm(self.gas_origin - pos)
         # val = self.max_val - self.alpha * dist**2
         dist = np.linalg.norm(self.gas_origin - pos)
-        val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off)
+        # val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off)
+        val = self.max_val*math.exp(-dist**2)*math.exp(-self.time_rate/(rospy.Time.now() - self.start_time).to_sec())
         return val
 
     def map_gen(self):
