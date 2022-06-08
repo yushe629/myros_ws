@@ -24,7 +24,7 @@ class GasDistributer:
         self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         self.gas_map_pub = rospy.Publisher("/true_gas_map", OccupancyGrid, queue_size=1)
         # setting rosTime
-        self.start_time = rospy.Time.now()
+        self.start_time = 0
         self.time_rate_off = 1.0
         self.time_rate = 1.0
 
@@ -44,18 +44,21 @@ class GasDistributer:
         self.gas_visual_map.data = [0] * self.gas_visual_map.info.width * self.gas_visual_map.info.height
         self.gas_map_pub_time = rospy.get_time()
 
-        self.map_gen()
-        self.gas_map_pub.publish(self.gas_visual_map)
-
         rospy.spin()
 
     def calc_gas_value(self, pos):
+        if self.start_time == 0:
+            self.start_time = rospy.get_time()
+            return
+
         # pos is 3d_array
         # dist = np.linalg.norm(self.gas_origin - pos)
         # val = self.max_val - self.alpha * dist**2
         dist = np.linalg.norm(self.gas_origin - pos)
+        del_time = rospy.get_time() - self.start_time
+        # val = self.max_val*math.exp(-dist**2)*math.exp(-del_time)
         # val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off)
-        val = self.max_val*math.exp(-dist**2)*math.exp(-self.time_rate/((rospy.Time.now() - self.start_time).to_sec()+self.time_rate_off))
+        val = self.max_val*math.exp(-dist**2)*math.exp(-self.time_rate/(del_time + self.time_rate_off))
         return val
 
     def map_gen(self):
