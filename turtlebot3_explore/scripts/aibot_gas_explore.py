@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-import imp
+
 import rospy
 import message_filters
 import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped
 from std_msgs.msg import Float32
-from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
 from nav_msgs.msg import OccupancyGrid
@@ -141,6 +140,7 @@ class gas_explore:
             self.goal_pub.publish(self.goal_pose)
             return
 
+        size = len(msg.ranges)
         #front_dist = msg.ranges[0]
         front_dists = msg.ranges[:half_of_scan_size]+ msg.ranges[(size - half_of_scan_size):]
         front_dist = min(list(map(lambda x: inf_distance if (x == float('inf') or x == 0.0
@@ -178,12 +178,6 @@ class gas_explore:
         cmd_msg = Twist()
         cmd_msg.linear.x = self.cmd_x
         cmd_msg.angular.z =self.cmd_yaw
-        # rospy.loginfo_throttle(1.0, "value: %s", str(self.gas_value))
-        # rospy.loginfo_throttle(1.0, "before_gas_value: %s", str(self.before_gas_value))
-        # rospy.loginfo_throttle(1.0, "maxvalue: %s", str(self.max_gas_value))
-        # rospy.loginfo_throttle(1.0, "x: %f", self.cmd_x)
-        # rospy.loginfo_throttle(1.0, "yaw: %f", self.cmd_yaw)
-        # rospy.loginfo_throttle(1.0, "array: %s", self.gas_map_array)
         self.vel_pub.publish(cmd_msg)
 
 if __name__ == "__main__":

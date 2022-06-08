@@ -17,7 +17,7 @@ class GasDistributer:
 
         rospy.init_node("gas_distributer")
 
-        self.gas_origin = rospy.get_param("gas_origin", [2.0,0.5,0])
+        self.gas_origin = rospy.get_param("~gas_origin", [2.0,0.5,0])
         self.gas_origin = np.array(self.gas_origin)
         self.alpha = rospy.get_param("~alpha", 1.0)
         self.max_val = rospy.get_param("~gap_max_val", 100)
