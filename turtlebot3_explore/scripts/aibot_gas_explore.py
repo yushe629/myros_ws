@@ -17,12 +17,12 @@ inf_distance = 5.0
 territory_radius = 1.0
 half_of_scan_size = 30
 # the velocity of exploring and the type of explore state
-explore_vel = 0.3
+explore_vel = 0.5
 explore_time = 0.3
-explore_yaw_vel = 1.0
-explore_yaw_time = 0.3
+explore_yaw_vel = 2.0
+explore_yaw_time = 1.0
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
-limit_time = 15
+limit_time = 30
 
 class gas_explore:
     def __init__(self):
@@ -83,6 +83,7 @@ class gas_explore:
     def gas_callback(self, msg):
         self.before_gas_value = self.gas_value
         self.gas_value = msg.data
+        rospy.loginfo("value: %s", msg)
         # Add gas map date to gas_map_array
         if self.robot_pose != None:
             self.gas_map_array = np.append(self.gas_map_array, [[self.robot_pose.position.x, self.robot_pose.position.y, msg.data]], axis=0)
@@ -157,7 +158,7 @@ class gas_explore:
             cmd_x = 0.3
             cmd_yaw = 0.0
 
-        rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
+        # rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
         if self.before_gas_value < self.gas_value:
             self.explore_state = 'front'
 
@@ -167,11 +168,11 @@ class gas_explore:
             self.cmd_x = 0.0
             self.cmd_yaw = 0.5
             self.explore_state = 'front'
-            rospy.loginfo_throttle(1.0, 'state: avoiding obstacle',)
+            # rospy.loginfo_throttle(1.0, 'state: avoiding obstacle')
         else:
             self.cmd_yaw = 0.0
             self.cmd_x = 0.0
-            rospy.loginfo_throttle(1.0, 'state: %s', self.explore_state)
+            # rospy.loginfo_throttle(1.0, 'state: %s', self.explore_state)
             self.explore()
 
 
