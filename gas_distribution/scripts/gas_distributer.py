@@ -19,14 +19,11 @@ class GasDistributer:
 
         self.gas_origin = rospy.get_param("~gas_origin", [2.0,0.5,0])
         self.gas_origin = np.array(self.gas_origin)
-        self.alpha = rospy.get_param("~alpha", 1.0)
+        # self.alpha = rospy.get_param("~alpha", 1.0)
         self.max_val = rospy.get_param("~gap_max_val", 100)
         self.gas_value_pub = rospy.Publisher("/gas", Float32, queue_size=10)
         self.gas_map_pub = rospy.Publisher("/true_gas_map", OccupancyGrid, queue_size=1)
         self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
-        # self.gas_map_array = None
-        # if self.gas_map_array == None:
-        #     self.map_gen()
 
         # gas map for visualization
         self.gas_visual_map = OccupancyGrid()
@@ -52,18 +49,13 @@ class GasDistributer:
     def calc_gas_value(self, pos):
         # pos is 3d_array
         dist = np.linalg.norm(self.gas_origin - pos)
-        val = self.max_val - self.alpha * dist**2
+        # val = self.max_val - self.alpha * dist**2
+        val = self.max_val*math.exp(-dist**2)
         return val
 
     def odom_callback(self, msg):
-        rospy.logdebug_throttle(1.0, "robot odom")
-
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
-        # distribution rule:
-        # dist = np.linalg.norm(self.gas_origin - pos)
-        # val = self.max_val*math.exp(-dist**2)
-        # val = self.max_val - self.alpha *  dist**2
         val = self.calc_gas_value(pos)
         value = Float32()
         value.data = val
@@ -71,16 +63,6 @@ class GasDistributer:
         self.gas_map_pub.publish(self.gas_visual_map)
 
     def map_gen(self):
-        # grid_width = map_width/float(map_grid)
-        # map_grid_half = map_grid/2
-        # grid_start = self.gas_origin - [grid_width*map_grid_half, grid_width*map_grid_half, 0]
-        # self.gas_map_array = np.empty((0,3), np.float32)
-        # for i in range(map_grid):
-        #     for j in range(map_grid):
-        #         x = grid_start[0]+i*grid_width
-        #         y = grid_start[1]+j*grid_width
-        #         value = self.calc_gas_value([x, y, 0])
-        #         self.gas_map_array = np.append(self.gas_map_array, [[x, y, value]], axis=0)
         width = self.gas_visual_map.info.width
         height = self.gas_visual_map.info.height
         for i in range(width*height):

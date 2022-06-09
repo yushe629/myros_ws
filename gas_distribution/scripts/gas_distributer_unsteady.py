@@ -17,7 +17,7 @@ class GasDistributer:
         self.gas_origin = rospy.get_param("~gas_origin", [2.0,0.5,0])
         self.gas_origin = np.array(self.gas_origin)
         # setting constant
-        self.alpha = rospy.get_param("~alpha", 1.0)
+        # self.alpha = rospy.get_param("~alpha", 1.0)
         self.max_val = rospy.get_param("~gap_max_val", 100)
         # define publisher and subscriber
         self.gas_value_pub = rospy.Publisher("/gas", Float32, queue_size=10)
@@ -53,8 +53,6 @@ class GasDistributer:
             return
 
         # pos is 3d_array
-        # dist = np.linalg.norm(self.gas_origin - pos)
-        # val = self.max_val - self.alpha * dist**2
         dist = np.linalg.norm(self.gas_origin - pos)
         del_time = rospy.get_time() - self.start_time
         # val = self.max_val*math.exp(-dist**2)*math.exp(-del_time)
@@ -77,10 +75,6 @@ class GasDistributer:
 
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
-        # distribution rule:
-        # dist = np.linalg.norm(self.gas_origin - pos)
-        # val = self.max_val*math.exp(-dist**2) * (math.exp(- self.time_rate * (rospy.Time.now() - self.start_time).to_sec()) + self.time_rate_off) 
-        # val = self.max_val - self.alpha *  dist**2
         value = Float32()
         value.data = self.calc_gas_value(pos)
         self.gas_value_pub.publish(value)
