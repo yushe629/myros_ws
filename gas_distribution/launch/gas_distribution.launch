@@ -10,22 +10,10 @@
   <!-- gas distributon -->
   <arg name="use_unsteady_gas" default="false" />
   <node pkg="gas_distribution" type="gas_distributer_unsteady.py" name="gas_distributer" output="screen" if="$(arg use_unsteady_gas)" >
-    <rosparam>
-      gas_visual_map_resolution: 0.2
-      gas_visual_map_origin: [-5.0, -5.0, 0]
-      gas_visual_scale: 1.0
-      gas_visual_offset: 10.0
-      gas_origin: [3.0, -1.0, 0]
-    </rosparam>
+    <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" />
   </node>
   <node pkg="gas_distribution" type="gas_distributer.py" name="gas_distributer" output="screen" unless="$(arg use_unsteady_gas)" >
-    <rosparam>
-      gas_visual_map_resolution: 0.2
-      gas_visual_map_origin: [-5.0, -5.0, 0]
-      gas_visual_scale: 1.0
-      gas_visual_offset: 10.0
-      gas_origin: [3.0, -1.0, 0]
-    </rosparam>
+    <param name="gas_visual_" value="$(find gas_distribution)/param/gas_visual_param.yaml" />
   </node>
 
 
