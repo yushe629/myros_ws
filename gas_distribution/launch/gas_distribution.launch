@@ -4,8 +4,8 @@
   <arg name="use_teleop" default="false" />
 
   <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
-  <arg name="initial_pose_x" default="0.0"/>
-  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_x" default="-2.0"/>
+  <arg name="initial_pose_y" default="-0.5"/>
   <arg name="initial_pose_a" default="0.0"/>
 
   <arg name="move_forward_only" default="false"/>
@@ -13,17 +13,18 @@
   <!-- gas distributon -->
   <arg name="use_unsteady_gas" default="false" />
   <node pkg="gas_distribution" type="gas_distributer_unsteady.py" name="gas_distributer" output="screen" if="$(arg use_unsteady_gas)" >
-    <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" />
+    <!-- <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" /> -->
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
   </node>
   <node pkg="gas_distribution" type="gas_distributer.py" name="gas_distributer" output="screen" unless="$(arg use_unsteady_gas)" >
     <!-- <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" /> -->
-    <rosparam>
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+    <!-- <rosparam>
       gas_visual_map_resolution: 0.2
       gas_visual_map_origin: [-5.0, -5.0, 0]
       gas_visual_scale: 1.0
       gas_visual_offset: 10.0
-    </rosparam>
-
+    </rosparam> -->
   </node>
 
   <!-- use turtlebot3 -->

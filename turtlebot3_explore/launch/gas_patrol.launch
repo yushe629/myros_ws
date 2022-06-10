@@ -1,0 +1,7 @@
+<launch>
+  <!-- launch gas_patrol node -->
+  <node pkg="turtlebot3_explore" type="gas_patrol.py" name="gas_patrol" output="screen">
+    <rosparam command="load" file="$(find turtlebot3_explore)/param/turtlebot3_relay_points.yaml"/>
+  </node>
+
+</launch>
