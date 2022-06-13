@@ -14,8 +14,8 @@ class gas_patrol:
         rospy.init_node("gas_patrol")
 
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
-        # self.relay_points = rospy.get_param("~relay_points")
-        self.relay_points = [[2.0, -0.5, 0, PI/2.0], [2.0, 0.5,0, PI], [-2.0, 0.5, 0, 3*PI/2.0], [-2.0, -0.5, 0, 0]]
+        self.relay_points = rospy.get_param("~relay_points")
+        # self.relay_points = [[2.0, -0.5, 0, PI/2.0], [2.0, 0.5,0, PI], [-2.0, 0.5, 0, 3*PI/2.0], [-2.0, -0.5, 0, 0]]
         self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.callback)
         self.is_moving = False
         self.nth_point = 0
@@ -30,7 +30,7 @@ class gas_patrol:
     def callback(self, msg):
         if msg.status.status == 3:
             rospy.loginfo("%s", msg.status.text)
-            rospy.sleep(2.0)
+            rospy.sleep(1.0)
             self.nth_point = self.nth_point+1
             self.is_moving = False
             self.is_goal_published = False
