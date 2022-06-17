@@ -5,6 +5,7 @@ import tf
 from geometry_msgs.msg import PoseStamped, Quaternion
 from move_base_msgs.msg import MoveBaseActionResult
 from tf.transformations import quaternion_from_euler
+from std_msgs.msg import Bool
 
 PI = math.pi
 
@@ -22,6 +23,9 @@ class gas_patrol:
         self.is_goal_published = False
         self.goal = PoseStamped()
         self.goal.header.frame_id = "map"
+
+        # publish topic for next node
+        self.is_finish_patrol_pub = rospy.Publisher("/is_finish_patrol", Bool, queue_size = 1)
         
         rospy.sleep(1.0)
         self.patrol()
@@ -31,12 +35,16 @@ class gas_patrol:
         if msg.status.status == 3:
             rospy.loginfo("%s", msg.status.text)
             rospy.sleep(1.0)
-            self.nth_point = self.nth_point+1
             self.is_moving = False
             self.is_goal_published = False
+            if self.nth_point == len(self.relay_points):
+                msg = Bool()
+                msg.data = True
+                self.is_finish_patrol_pub.publish(msg)
+
         else:
             rospy.loginfo("%s",msg.status.text)
-    
+            
     def calc_plan(self, point):
         self.goal.header.seq = self.goal.header.seq + 1
         self.goal.header.stamp = rospy.Time.now()
@@ -54,9 +62,10 @@ class gas_patrol:
             if not self.is_moving:
                 if not self.is_goal_published:
                     self.calc_plan(self.relay_points[self.nth_point])
+                    self.nth_point = self.nth_point+1
                     self.goal_pub.publish(self.goal)
                     self.is_goal_published = True
-        
+                    self.is_moving = True            
 
 if __name__ == "__main__":
     try:

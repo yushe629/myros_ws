@@ -5,7 +5,7 @@ import message_filters
 import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped, Pose
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Bool
 from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
@@ -35,11 +35,12 @@ class gas_scrutinize:
         self.gas_value_sub = rospy.Subscriber("/gas", Float32, self.gas_callback)
         self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         
+        self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
+        self.execute = False
         
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
         self.timeout_sec = rospy.get_param("~timeout_sec", 15.0)
-
 
         self.start_time = 0
         self.max_gas_value = 0.0
@@ -53,6 +54,10 @@ class gas_scrutinize:
         self.iscorrect_path = True
 
         rospy.spin()
+
+    def search_callback(self, msg):
+        if msg.data == true:
+            self.execute = True
 
     def odom_callback(self, msg):
         self.robot_pose = msg.pose.pose
@@ -86,6 +91,9 @@ class gas_scrutinize:
     def callback(self, msg):
         if self.start_time == 0:
             self.start_time = rospy.get_time()
+            return
+
+        if self.execute == False:
             return
         
         if self.explore_state == "explored":

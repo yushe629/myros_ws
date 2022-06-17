@@ -56,7 +56,7 @@ class gas_mapping:
         self.gas_visual_map.info.resolution = rospy.get_param("~gas_visual_map_resolution", 0.05) # 0.05 m/pixel
         origin = rospy.get_param("~gas_visual_map_origin", [-10.0, -10.0, 0.0])
         print(origin)
-        self.gas_visual_map.info.width = int(math.fabs(origin[0]) / self.gas_visual_map.info.resolnution * 2)
+        self.gas_visual_map.info.width = int(math.fabs(origin[0]) / self.gas_visual_map.info.resolution * 2)
         self.gas_visual_map.info.height = int(math.fabs(origin[1]) / self.gas_visual_map.info.resolution * 2)
         self.gas_visual_map.info.origin.position.x = origin[0]
         self.gas_visual_map.info.origin.position.y = origin[1]
@@ -65,6 +65,7 @@ class gas_mapping:
         self.gas_visual_map.data = [0] * self.gas_visual_map.info.width * self.gas_visual_map.info.height
         self.gas_map_pub_time = rospy.get_time()
 
+        rospy.sleep(1.0)
         rospy.spin()
         # TODO How to use two or three subscribers
 

@@ -5,10 +5,10 @@ import message_filters
 import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Bool
 from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
-from move_base_msgs.msg import MoveBaseActionGoal
+from move_base_msgs.msg import MoveBaseActionGoal, MoveBaseActionResult
 from nav_msgs.msg import OccupancyGrid
 import numpy as np
 
@@ -17,10 +17,18 @@ class gas_roughly_search:
         
         rospy.init_node("gas_roughly_search")
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=10)
-        self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.callback)
+        self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map",OccupancyGrid,  self.callback)
+
+        # TODO: adjust params
+        self.gas_visual_map = OccupancyGrid()
+        self.gas_visual_map.header.frame_id = "map"
+        self.gas_scale = rospy.get_param("~gas_visual_scale", 1.0)
+        self.gas_offset = rospy.get_param("~gas_visual_offset", 0.0)
+
+        
         self.gas_visual_map.info.resolution = rospy.get_param("~gas_visual_map_resolution", 0.05) # 0.05 m/pixel
         origin = rospy.get_param("~gas_visual_map_origin", [-10.0, -10.0, 0.0])
-        self.gas_visual_map.info.width = int(math.fabs(origin[0]) / self.gas_visual_map.info.resolnution * 2)
+        self.gas_visual_map.info.width = int(math.fabs(origin[0]) / self.gas_visual_map.info.resolution * 2)
         self.gas_visual_map.info.height = int(math.fabs(origin[1]) / self.gas_visual_map.info.resolution * 2)
         self.gas_visual_map.info.origin.position.x = origin[0]
         self.gas_visual_map.info.origin.position.y = origin[1]
@@ -29,12 +37,31 @@ class gas_roughly_search:
         self.gas_visual_map.data = [0] * self.gas_visual_map.info.width * self.gas_visual_map.info.height
 
         
-        self.execute = false
+        self.execute = False
 
+        # publish and subscirbe topic 
+        self.is_finish_patrol_sub = rospy.Subscriber("/is_finish_patrol", Bool, self.patrol_callback)
+        # self.is_finish_search_pub = rospy.Publisher("/is_finish_search", Bool, queue_size=1)
+        # self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.move_base_callback)
+        
         
         rospy.spin()
 
+    # def move_base_callback(self, msg):
+    #     if not self.execute:
+    #         return
+    #     if msg.status.status == 3:
+    #         rospy.loginfo("%s", msg.status.text)
+    #         rospy.sleep(1.0)
+    #         self.execute = False
+    #         self.is_finish_search_pub(true)
+    #     else:
+    #         rospy.loginfo("%s",msg.status.text)
 
+    def patrol_callback(self, msg):
+        self.execute = msg.data
+            
+        
     def callback(self, msg):
         if not self.execute:
             return
