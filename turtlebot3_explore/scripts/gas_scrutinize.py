@@ -99,16 +99,16 @@ class gas_scrutinize:
             self.explore_state = 'front'
             
     def callback(self, msg):
-        if self.start_time == 0:
-            self.start_time = rospy.get_time()
-            return
-
         if not self.execute:
             return
-        
-        if self.explore_state == "explored":
+
+        if self.start_time == 0:
+            self.start_time = rospy.get_time()
+            self.max_gas_value_time = rospy.time()
             return
 
+        if self.explore_state == "explored":
+            return
 
         last_sec = (rospy.get_time() - self.max_gas_value_time)
         # rospy.loginfo_throttle(1.0, "last_sec: %f", last_sec)

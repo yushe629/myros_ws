@@ -68,7 +68,7 @@ class GasDistributer:
             y = i / width * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.y
             half = self.gas_visual_map.info.resolution / 2
             value = self.calc_gas_value([x + half, y + half, 0])
-            self.gas_visual_map.data[i] = value
+            self.gas_visual_map.data[i] = int(value*self.gas_scale + self.gas_offset)
 
     def odom_callback(self, msg):
         rospy.logdebug_throttle(1.0, "robot odom")

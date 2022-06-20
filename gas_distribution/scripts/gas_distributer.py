@@ -70,7 +70,7 @@ class GasDistributer:
             y = i / width * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.y
             half = self.gas_visual_map.info.resolution / 2
             value = self.calc_gas_value([x + half, y + half, 0])
-            self.gas_visual_map.data[i] = value*self.gas_scale + self.gas_offset
+            self.gas_visual_map.data[i] = int(value*self.gas_scale + self.gas_offset)
 
 if __name__ == "__main__":
     try:

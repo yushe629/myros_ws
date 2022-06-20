@@ -18,5 +18,7 @@
   </node>
   <node pkg="turtlebot3_explore" type="gas_scrutinize.py" name="gas_scrutinize" output="screen"/>
 
+  <node pkg="rviz" type="rviz" name="gas_rviz" required="true"
+        args="-d $(find turtlebot3_explore)/config/gas_explore.rviz"/>
 
 </launch>
