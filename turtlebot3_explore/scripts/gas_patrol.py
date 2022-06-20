@@ -24,6 +24,8 @@ class gas_patrol:
         self.goal = PoseStamped()
         self.goal.header.frame_id = "map"
 
+        self.execute = True
+
         # publish topic for next node
         self.is_finish_patrol_pub = rospy.Publisher("/is_finish_patrol", Bool, queue_size = 1)
         
@@ -32,6 +34,8 @@ class gas_patrol:
         rospy.spin()
         
     def callback(self, msg):
+        if not self.execute:
+            return
         if msg.status.status == 3:
             rospy.loginfo("%s", msg.status.text)
             rospy.sleep(1.0)
@@ -41,6 +45,7 @@ class gas_patrol:
                 msg = Bool()
                 msg.data = True
                 self.is_finish_patrol_pub.publish(msg)
+                self.execute = False
 
         else:
             rospy.loginfo("%s",msg.status.text)
@@ -58,6 +63,8 @@ class gas_patrol:
         self.goal.pose.orientation.w = q[3]
         
     def patrol(self):
+        if not self.execute:
+            return
         while self.nth_point < len(self.relay_points):
             if not self.is_moving:
                 if not self.is_goal_published:
@@ -65,7 +72,7 @@ class gas_patrol:
                     self.nth_point = self.nth_point+1
                     self.goal_pub.publish(self.goal)
                     self.is_goal_published = True
-                    self.is_moving = True            
+                    self.is_moving = True
 
 if __name__ == "__main__":
     try:

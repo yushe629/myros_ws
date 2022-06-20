@@ -22,7 +22,6 @@ explore_time = 0.3
 explore_yaw_vel = 1.0
 explore_yaw_time = 0.3
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
-limit_time = 30.0
 
 class gas_scrutinize:
     def __init__(self):
@@ -36,8 +35,9 @@ class gas_scrutinize:
         self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         
         self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
+
         self.execute = False
-        
+
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
         self.timeout_sec = rospy.get_param("~timeout_sec", 15.0)
@@ -52,21 +52,31 @@ class gas_scrutinize:
         self.cmd_yaw = 0.0
         self.explore_state = 'front'
         self.iscorrect_path = True
+        self.max_gas_value_time = rospy.get_time()
+        self.before_gas_value = 0
+        self.gas_value = 0
 
         rospy.spin()
 
     def search_callback(self, msg):
-        if msg.data == true:
-            self.execute = True
+        self.execute = msg.data
+        self.start_time = rospy.get_time()
 
     def odom_callback(self, msg):
+        if not self.execute:
+            return
         self.robot_pose = msg.pose.pose
 
     def gas_callback(self,msg):
+        if not self.execute:
+            return
+        self.before_gas_value = self.gas_value
+        self.gas_value = msg.data
         if msg.data > self.max_gas_value:
             self.max_gas_value = msg.data
             self.final_robot_pose = self.robot_pose
-            self.max_gas_value.time = rospy.get_time()
+            self.max_gas_value_time = rospy.get_time()
+
 
     def explore(self):
         if self.explore_state == 'front':
@@ -87,20 +97,21 @@ class gas_scrutinize:
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
             self.explore_state = 'front'
-
+            
     def callback(self, msg):
         if self.start_time == 0:
             self.start_time = rospy.get_time()
             return
 
-        if self.execute == False:
+        if not self.execute:
             return
         
         if self.explore_state == "explored":
             return
 
 
-        last_sec = (rospy.get_time().to_sec() - self.max_gas_value_time.to_sec())
+        last_sec = (rospy.get_time() - self.max_gas_value_time)
+        # rospy.loginfo_throttle(1.0, "last_sec: %f", last_sec)
         if last_sec  > self.timeout_sec:
             rospy.logwarn_once("Robot discovered goal!")
             self.explore_state = "explored"
@@ -110,6 +121,7 @@ class gas_scrutinize:
             self.goal_pose.header.stamp = rospy.Time.now()
             self.goal_pose.pose = self.final_robot_pose
             self.goal_pub.publish(self.goal_pose)
+            self.execute = False
             return
 
         #front_dist = msg.ranges[0]

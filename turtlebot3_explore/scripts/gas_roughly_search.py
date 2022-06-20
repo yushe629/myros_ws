@@ -41,26 +41,29 @@ class gas_roughly_search:
 
         # publish and subscirbe topic 
         self.is_finish_patrol_sub = rospy.Subscriber("/is_finish_patrol", Bool, self.patrol_callback)
-        # self.is_finish_search_pub = rospy.Publisher("/is_finish_search", Bool, queue_size=1)
-        # self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.move_base_callback)
+        self.is_finish_search_pub = rospy.Publisher("/is_finish_search", Bool, queue_size=1)
+        self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.move_base_callback)
         
         
         rospy.spin()
 
-    # def move_base_callback(self, msg):
-    #     if not self.execute:
-    #         return
-    #     if msg.status.status == 3:
-    #         rospy.loginfo("%s", msg.status.text)
-    #         rospy.sleep(1.0)
-    #         self.execute = False
-    #         self.is_finish_search_pub(true)
-    #     else:
-    #         rospy.loginfo("%s",msg.status.text)
+    def move_base_callback(self, msg):
+        if not self.execute:
+            return
+        if msg.status.status == 3:
+            rospy.loginfo("%s", msg.status.text)
+            rospy.sleep(1.0)
+            new_msg = Bool()
+            new_msg.data = True
+            self.is_finish_search_pub.publish(new_msg)
+            self.execute = False
+        else:
+            rospy.loginfo("%s",msg.status.text)
 
     def patrol_callback(self, msg):
         self.execute = msg.data
-            
+        if self.execute:
+            rospy.loginfo("Searching")
         
     def callback(self, msg):
         if not self.execute:
