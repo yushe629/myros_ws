@@ -6,7 +6,6 @@ import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped, Pose
 from std_msgs.msg import Float32, Bool
-from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
 from nav_msgs.msg import OccupancyGrid
@@ -15,7 +14,8 @@ import numpy as np
 # if scan_val is Inf, inf_distance is assigned.
 inf_distance = 5.0
 # the radius of the robot explore area
-territory_radius = 0.6
+territory_radius = 1.0
+half_of_scan_size = 30
 # the velocity of exploring and the type of explore state
 explore_vel = 0.3
 explore_time = 0.3
@@ -125,9 +125,14 @@ class gas_scrutinize:
             return
 
         #front_dist = msg.ranges[0]
-        front_dists = msg.ranges[:20]+ msg.ranges[340:]
-        front_dist = min(list(map(lambda x: inf_distance if x == float('inf') else x, front_dists)))
-        
+        # front_dists = msg.ranges[:20]+ msg.ranges[340:]
+        # front_dist = min(list(map(lambda x: inf_distance if x == float('inf') else x, front_dists)))
+        size = len(msg.ranges)
+        front_dists = msg.ranges[:half_of_scan_size]+ msg.ranges[(size - half_of_scan_size):]
+        front_dist = min(list(map(lambda x: inf_distance if (x == float('inf') or x == 0.0
+        ) else x, front_dists)))
+        rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
+
         if self.before_gas_value < self.gas_value:
             self.explore_state = 'front'
 

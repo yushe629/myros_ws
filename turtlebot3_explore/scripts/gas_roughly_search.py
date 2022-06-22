@@ -6,7 +6,6 @@ import math
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped
 from std_msgs.msg import Float32, Bool
-from turtlebot3_explore.msg import PositionAndGas
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal, MoveBaseActionResult
 from nav_msgs.msg import OccupancyGrid
