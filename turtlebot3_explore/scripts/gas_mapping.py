@@ -16,7 +16,9 @@ class gas_mapping:
         self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         # self.mf = message_filters.ApproximateTimeSynchronizer([self.scan_sub, self.gas_value_sub], queue_size=10, deley =1/100. * 0.5)
         # self.mf.registerCallback(self.callback)
-        self.robot_pose = None
+        # self.robot_pose = None
+
+        self.gas_value = None
 
         # gap map for visualization
         self.gas_visual_map = OccupancyGrid()
@@ -39,18 +41,19 @@ class gas_mapping:
         rospy.spin()
         # TODO How to use two or three subscribers
 
-    def odom_callback(self,msg):
+    def gas_callback(self,msg):
         # set Odometry.pose.pose
-        self.robot_pose = msg.pose.pose
-
-    def gas_callback(self, msg):
+        # self.robot_pose = msg.pose.pose
+        self.gas_value = msg.data
+        
+    def odom_callback(self, msg):
         # Add gas map date to gas_map_array
-        if self.robot_pose != None:
-
+        if self.gas_value != None:
+            robot_pose = msg.pose.pose
             # visualize the gas map
-            pixel_x = int((self.robot_pose.position.x - self.gas_visual_map.info.origin.position.x) / self.gas_visual_map.info.resolution)
-            pixel_y = int((self.robot_pose.position.y - self.gas_visual_map.info.origin.position.y) / self.gas_visual_map.info.resolution)
-            self.gas_visual_map.data[pixel_y * self.gas_visual_map.info.width + pixel_x] = int(msg.data * self.gas_scale + self.gas_offset)
+            pixel_x = int((robot_pose.position.x - self.gas_visual_map.info.origin.position.x) / self.gas_visual_map.info.resolution)
+            pixel_y = int((robot_pose.position.y - self.gas_visual_map.info.origin.position.y) / self.gas_visual_map.info.resolution)
+            self.gas_visual_map.data[pixel_y * self.gas_visual_map.info.width + pixel_x] = int(self.gas_value * self.gas_scale + self.gas_offset)
 
             if rospy.get_time() - self.gas_map_pub_time > 1.0: # publish in 1 Hz
                 self.gas_map_pub.publish(self.gas_visual_map)
