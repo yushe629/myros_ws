@@ -1,6 +1,6 @@
 <launch>
-
-  <arg name="plan_file" default="$(find turtlebot3_explore)/param/aibot_demo.yaml" />
+  <arg name="plan_file_short_hand" default="debug_points.yaml" />
+  <arg name="plan_file" default="$(find turtlebot3_explore)/param/$(arg plan_file_short_hand)" />
 
   <!-- launch gas_patrol node -->
   <node pkg="turtlebot3_explore" type="gas_patrol.py" name="gas_patrol">
