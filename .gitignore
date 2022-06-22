@@ -53,3 +53,7 @@ CATKIN_IGNORE
 
 #VSCode
 .vscode
+
+/turtlebot3_explore/resources/bag/*
+
+!.gitkeep

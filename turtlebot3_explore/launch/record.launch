@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="bag_file_name" default="my_bag"/>
+    <!-- Record bag -->
+    <node name="bag_record" pkg="rosbag" type="record"
+        args="record -O $(find turtlebot3_explore)/resources/bag/$(arg bag_file_name).bag
+	      /gas
+	      /eco2
+	      /odom
+	      /true_gas_map
+	      /estimated_gas_map
+	      /scan
+	      /map
+	      /particlecloud
+	      /move_base_simple/goal
+	      /move_base
+	      /is_finish_patrol
+	      /is_finish_search
+	      /tf /tf_static"/>
+</launch>
