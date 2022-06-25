@@ -54,6 +54,8 @@ CATKIN_IGNORE
 #VSCode
 .vscode
 
+/gas_distribution/maps/*
+
 /turtlebot3_explore/resources/bag/*
 
 !.gitkeep
