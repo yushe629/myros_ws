@@ -3,7 +3,8 @@
   <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
 
   <!-- Map server -->
-  <arg name="map_file" default="$(find gas_distribution)/maps/map.yaml"/>
+  <arg name="map_file_shorthand" default="map.yaml" />
+  <arg name="map_file" default="$(find gas_distribution)/maps/$(arg map_file_shorthand)"/>
   <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
 
   <!-- amcl -->
