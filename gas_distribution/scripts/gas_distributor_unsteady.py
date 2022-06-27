@@ -41,7 +41,6 @@ class GasDistributer:
         return val
 
     def odom_callback(self, msg):
-        rospy.loginfo("msg: %s", msg)
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
         val = self.calc_gas_value(pos)
@@ -49,9 +48,6 @@ class GasDistributer:
         value = Float32()
         value.data = val
         self.gas_value_pub.publish(value)
-
-
-
 
 if __name__ == "__main__":
     try:
