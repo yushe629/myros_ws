@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-import sys
 import rospy
 import math
 import numpy as np
@@ -14,7 +12,7 @@ class GasDistributer:
         rospy.init_node("gas_distributer_time")
 
         # gas source coordinate
-        self.gas_origin = rospy.get_param("~gas_origin", [2.0,0.5,0])
+        self.gas_origin = rospy.get_param("~gas_origin", [2.0,0.5,0.0])
         self.gas_origin = np.array(self.gas_origin)
         # setting constant
         # self.alpha = rospy.get_param("~alpha", 1.0)
@@ -29,6 +27,7 @@ class GasDistributer:
         self.time_rate = 1.0
         self.dist_rate = 10.0
 
+        # gas map for visualization
         self.gas_visual_map = OccupancyGrid()
         self.gas_visual_map.header.frame_id = "map"
         self.gas_scale = rospy.get_param("~gas_visual_scale", 1.0)
@@ -60,6 +59,18 @@ class GasDistributer:
         val = self.max_val*math.exp(-dist**2)*math.exp(-self.time_rate/(del_time + self.time_rate_off))
         return val
 
+    def odom_callback(self, msg):
+        rospy.loginfo("msg: %s", msg)
+        pos = msg.pose.pose.position
+        pos = np.array([pos.x, pos.y, pos.z])
+        val = self.calc_gas_value(pos)
+        # rospy.loginfo("pos: %s", pos)
+        value = Float32()
+        value.data = val
+        self.gas_value_pub.publish(value)
+        self.map_gen()
+        self.gas_map_pub.publish(self.gas_visual_map)
+
     def map_gen(self):
         width = self.gas_visual_map.info.width
         height = self.gas_visual_map.info.height
@@ -69,17 +80,6 @@ class GasDistributer:
             half = self.gas_visual_map.info.resolution / 2
             value = self.calc_gas_value([x + half, y + half, 0])
             self.gas_visual_map.data[i] = int(value*self.gas_scale + self.gas_offset)
-
-    def odom_callback(self, msg):
-        rospy.logdebug_throttle(1.0, "robot odom")
-
-        pos = msg.pose.pose.position
-        pos = np.array([pos.x, pos.y, pos.z])
-        value = Float32()
-        value.data = self.calc_gas_value(pos)
-        self.gas_value_pub.publish(value)
-        self.map_gen()
-        self.gas_map_pub.publish(self.gas_visual_map)
 
 
 
