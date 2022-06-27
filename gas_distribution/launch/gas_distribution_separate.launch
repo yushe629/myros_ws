@@ -1,0 +1,9 @@
+<launch>
+  <!-- gas distributon -->
+  <node pkg="gas_distribution" type="gas_distributor_unsteady.py" name="gas_distributer" output="screen" >
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node>
+  <node pkg="gas_distribution" type="global_gas_map.py" name="global_gas_map">
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node>
+</launch>

@@ -55,6 +55,7 @@ class GasDistributer:
         pos = msg.pose.pose.position
         pos = np.array([pos.x, pos.y, pos.z])
         val = self.calc_gas_value(pos)
+        rospy.loginfo("pos: %s", pos)
         value = Float32()
         value.data = val
         self.gas_value_pub.publish(value)
