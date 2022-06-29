@@ -39,7 +39,7 @@ class gas_scrutinize:
         
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
-        self.timeout_sec = rospy.get_param("~timeout_sec", 20.0)
+        self.timeout_sec = rospy.get_param("~timeout_sec", 30.0)
 
         self.start_time = 0
         self.max_gas_value = 0.0
@@ -132,7 +132,7 @@ class gas_scrutinize:
         ) else x, front_dists)))
         rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
 
-        if self.before_gas_value < self.gas_value and (not self.explore == 'turn' or not self.explore == 'back'):
+        if self.before_gas_value < self.gas_value:
             self.explore_state = 'front'
 
         if (front_dist < territory_radius):
