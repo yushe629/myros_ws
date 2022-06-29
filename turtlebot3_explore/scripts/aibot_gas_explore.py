@@ -17,8 +17,8 @@ inf_distance = 5.0
 territory_radius = 1.0
 half_of_scan_size = 30
 # the velocity of exploring and the type of explore state
-explore_vel = 0.5
-explore_time = 0.3
+explore_vel = 0.3
+explore_time = 0.5
 explore_yaw_vel = 2.0
 explore_yaw_time = 1.0
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
@@ -104,6 +104,7 @@ class gas_explore:
 
     def explore(self):
         if self.explore_state == 'front':
+            rospy.sleep(explore_time)
             self.cmd_x = explore_vel
             self.cmd_yaw = 0.0
             self.explore_state = 'back'

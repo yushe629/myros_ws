@@ -37,6 +37,7 @@ class gas_roughly_search:
 
         
         self.execute = False
+        self.completed = False
 
         # publish and subscirbe topic 
         self.is_finish_patrol_sub = rospy.Subscriber("/is_finish_patrol", Bool, self.patrol_callback)
@@ -67,25 +68,27 @@ class gas_roughly_search:
     def callback(self, msg):
         if not self.execute:
             return
-        mapdata = msg.data
-        mapindex = mapdata.index(max(mapdata))
-        target_x_pixel = mapindex % self.gas_visual_map.info.width
-        target_y_pixel = mapindex / self.gas_visual_map.info.width
-        target_x = target_x_pixel * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.x
-        target_y = target_y_pixel * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.y
-        target = PoseStamped()
-        target.header.frame_id = "map"
-        target.header.seq = target.header.seq + 1
-        target.header.stamp = rospy.Time.now()
-        target.pose.position.x = target_x
-        target.pose.position.y = target_y
-        target.pose.position.z = 0.0
-        target.pose.orientation.x = 0.0
-        target.pose.orientation.y = 0.0
-        target.pose.orientation.z = 0.0
-        target.pose.orientation.w = 1.0
-        self.goal_pub.publish(target)
-
+        if not self.completed:
+            mapdata = msg.data
+            mapindex = mapdata.index(max(mapdata))
+            target_x_pixel = mapindex % self.gas_visual_map.info.width
+            target_y_pixel = mapindex / self.gas_visual_map.info.width
+            target_x = target_x_pixel * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.x
+            target_y = target_y_pixel * self.gas_visual_map.info.resolution + self.gas_visual_map.info.origin.position.y
+            target = PoseStamped()
+            target.header.frame_id = "map"
+            target.header.seq = target.header.seq + 1
+            target.header.stamp = rospy.Time.now()
+            target.pose.position.x = target_x
+            target.pose.position.y = target_y
+            target.pose.position.z = 0.0
+            target.pose.orientation.x = 0.0
+            target.pose.orientation.y = 0.0
+            target.pose.orientation.z = 0.0
+            target.pose.orientation.w = 1.0
+            self.goal_pub.publish(target)
+            self.completed = True
+        return
         
 if __name__ == "__main__":
     try:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import imp
 import rospy
 import message_filters
 import math
@@ -18,9 +17,9 @@ territory_radius = 1.0
 half_of_scan_size = 30
 # the velocity of exploring and the type of explore state
 explore_vel = 0.3
-explore_time = 0.3
-explore_yaw_vel = 1.0
-explore_yaw_time = 0.3
+explore_time = 0.5
+explore_yaw_vel = 2.0
+explore_yaw_time = 1.0
 explore_state = ['front', 'back', 'turn', 'after_turn', 'explored']
 
 class gas_scrutinize:
@@ -37,10 +36,10 @@ class gas_scrutinize:
         self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
 
         self.execute = False
-
+        
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
-        self.timeout_sec = rospy.get_param("~timeout_sec", 15.0)
+        self.timeout_sec = rospy.get_param("~timeout_sec", 20.0)
 
         self.start_time = 0
         self.max_gas_value = 0.0
@@ -133,7 +132,7 @@ class gas_scrutinize:
         ) else x, front_dists)))
         rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
 
-        if self.before_gas_value < self.gas_value:
+        if self.before_gas_value < self.gas_value and (not self.explore == 'turn' or not self.explore == 'back'):
             self.explore_state = 'front'
 
         if (front_dist < territory_radius):
