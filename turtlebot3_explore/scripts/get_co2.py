@@ -9,7 +9,9 @@ class get_co2:
         rospy.init_node("get_co2")
         self.gas_pub = rospy.Publisher("/gas", Float32, queue_size=10)
         self.eco2_sub = rospy.Subscriber("/eco2", UInt16, self.callback)
-        self.norm = 10.0
+        # self.norm = rospy.get_param("~norm", 10.0)
+        # for test, setting norm = 5.0
+        self.norm = 5.0
         rospy.spin()
         
     def callback(self, msg):
