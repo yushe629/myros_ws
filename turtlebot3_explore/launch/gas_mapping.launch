@@ -1,0 +1,6 @@
+<launch>
+  <!-- launch gas_mapping node -->
+  <node pkg="turtlebot3_explore" type="gas_mapping_tf.py" name="gas_mapping" output="screen">
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node>
+</launch>

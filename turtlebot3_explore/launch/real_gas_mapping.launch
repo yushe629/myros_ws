@@ -4,7 +4,7 @@
   <node pkg="turtlebot3_explore" type="get_co2.py" name="get_co2" />
   <!-- launch gas_mapping node -->
 
-  <node pkg="turtlebot3_explore" type="gas_mapping.py" name="gas_mapping">
+  <node pkg="turtlebot3_explore" type="gas_mapping_tf.py" name="gas_mapping">
     <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
   </node>
 

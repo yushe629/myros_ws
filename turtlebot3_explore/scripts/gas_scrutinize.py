@@ -2,6 +2,8 @@
 import rospy
 import message_filters
 import math
+import tf
+import tf2_ros
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist, PoseStamped, Pose
 from std_msgs.msg import Float32, Bool
@@ -31,7 +33,12 @@ class gas_scrutinize:
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=10)
         self.scan_sub = rospy.Subscriber("/scan", LaserScan, self.callback)
         self.gas_value_sub = rospy.Subscriber("/gas", Float32, self.gas_callback)
-        self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        # use tf
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.rate = rospy.Rate(10.0)
+        
+        # self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         
         self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
 
@@ -61,10 +68,10 @@ class gas_scrutinize:
         self.execute = msg.data
         self.start_time = rospy.get_time()
 
-    def odom_callback(self, msg):
-        if not self.execute:
-            return
-        self.robot_pose = msg.pose.pose
+    # def odom_callback(self, msg):
+    #     if not self.execute:
+    #         return
+    #     self.robot_pose = msg.pose.pose
 
     def gas_callback(self,msg):
         if not self.execute:
@@ -72,10 +79,15 @@ class gas_scrutinize:
         self.before_gas_value = self.gas_value
         self.gas_value = msg.data
         if msg.data > self.max_gas_value:
-            self.max_gas_value = msg.data
-            self.final_robot_pose = self.robot_pose
-            self.max_gas_value_time = rospy.get_time()
-
+            try:
+                self.max_gas_value = msg.data
+                self.max_gas_value_time = rospy.get_time()
+                t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
+                self.final_robot_pose = t.transform.translation
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+                print(e)
+                self.rate.sleep()
+            
 
     def explore(self):
         if self.explore_state == 'front':
