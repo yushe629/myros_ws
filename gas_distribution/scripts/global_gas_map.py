@@ -19,7 +19,7 @@ class GasGlobalMapping:
         self.max_val = rospy.get_param("~gap_max_val", 100)
         # define publisher and subscriber
         self.gas_map_pub = rospy.Publisher("/true_gas_map", OccupancyGrid, queue_size=10)
-        self.odom_subscriber = rospy.Subscriber("/odom", Odometry, self.callback)
+        # self.odom_subscriber = rospy.Subscriber("/odom", Odometry, self.callback)
         # setting rosTime
         self.start_time = 0
         self.time_rate_off = 1.0
@@ -43,9 +43,10 @@ class GasGlobalMapping:
         self.gas_visual_map.data = [0] * self.gas_visual_map.info.width * self.gas_visual_map.info.height
         self.gas_map_pub_time = rospy.get_time()
 
-        rospy.spin()
         while not rospy.is_shutdown():
             self.map_gen()
+            self.gas_map_pub.publish(self.gas_visual_map)
+        rospy.spin()
 
         
 
@@ -75,8 +76,8 @@ class GasGlobalMapping:
             value = self.calc_gas_value([x + half, y + half, 0])
             self.gas_visual_map.data[i] = int(value*self.gas_scale + self.gas_offset)
 
-    def callback(self, msg):
-        self.gas_map_pub.publish(self.gas_visual_map)
+    # def callback(self, msg):
+    #     self.gas_map_pub.publish(self.gas_visual_map)
 
 if __name__ == "__main__":
     try:
