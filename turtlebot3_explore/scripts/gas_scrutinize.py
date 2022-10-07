@@ -83,7 +83,8 @@ class gas_scrutinize:
                 self.max_gas_value = msg.data
                 self.max_gas_value_time = rospy.get_time()
                 t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
-                self.final_robot_pose = t.transform.translation
+                translation = t.transform.translation
+                self.final_robot_pose.position = [translation.x, translation.y, translation.z]
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 print(e)
                 self.rate.sleep()

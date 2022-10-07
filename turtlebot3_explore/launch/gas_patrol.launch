@@ -7,10 +7,10 @@
     <rosparam command="load" file="$(arg plan_file)" />
   </node>
 
-  <!-- launch gas_mapping node -->
+  <!-- launch gas_mapping node
   <node pkg="turtlebot3_explore" type="gas_mapping_tf.py" name="gas_mapping">
     <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
-  </node>
+  </node> -->
 
   <!-- launch gas_explore <node>s -->
   <node pkg="turtlebot3_explore" type="gas_roughly_search.py" name="gas_roughly_search" output="screen">
