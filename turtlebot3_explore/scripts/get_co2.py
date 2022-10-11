@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Float32, UInt16
@@ -17,7 +19,7 @@ class get_co2:
         
     def callback(self, msg):
         gas_msg = Float32()
-        gas_msg.data = (float(msg.data)/self.norm) - self.base
+        gas_msg.data = float(msg.data - self.base)/self.norm
         self.gas_pub.publish(gas_msg)
 
 if __name__ == "__main__":
