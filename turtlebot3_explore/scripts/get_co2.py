@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import Float32, UInt16
