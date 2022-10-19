@@ -10,7 +10,6 @@ from std_msgs.msg import Float32, Bool
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
 from nav_msgs.msg import OccupancyGrid
-import numpy as np
 
 # if scan_val is Inf, inf_distance is assigned.
 inf_distance = 5.0
@@ -29,6 +28,7 @@ class gas_scrutinize:
 
         rospy.init_node("gas_scrutinize")
 
+        self.execute = False
         self.vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=10)
         self.scan_sub = rospy.Subscriber("/scan", LaserScan, self.callback)
@@ -42,11 +42,10 @@ class gas_scrutinize:
         
         self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
 
-        self.execute = False
         
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
-        self.timeout_sec = rospy.get_param("~timeout_sec", 30.0)
+        self.timeout_sec = rospy.get_param("~timeout_sec", 15.0)
 
         self.start_time = 0
         self.max_gas_value = 0.0
@@ -83,8 +82,14 @@ class gas_scrutinize:
                 self.max_gas_value = msg.data
                 self.max_gas_value_time = rospy.get_time()
                 t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
-                translation = t.transform.translation
-                self.final_robot_pose.position = [translation.x, translation.y, translation.z]
+                transform = t.transform
+                self.final_robot_pose.position.x = transform.translation.x
+                self.final_robot_pose.position.y = transform.translation.y
+                self.final_robot_pose.position.z = transform.translation.z
+                self.final_robot_pose.orientation.x = transform.rotation.x
+                self.final_robot_pose.orientation.y = transform.rotation.y
+                self.final_robot_pose.orientation.z = transform.rotation.z
+                self.final_robot_pose.orientation.w = transform.rotation.w
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 print(e)
                 self.rate.sleep()
@@ -129,9 +134,16 @@ class gas_scrutinize:
             self.explore_state = "explored"
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
+            cmd_msg = Twist()
+            cmd_msg.linear.x = self.cmd_x
+            cmd_msg.angular.z =self.cmd_yaw
+            self.vel_pub.publish(cmd_msg)
+            
             self.goal_pose.header.seq = self.goal_pose.header.seq + 1
             self.goal_pose.header.stamp = rospy.Time.now()
             self.goal_pose.pose = self.final_robot_pose
+            rospy.loginfo("goal_pose: %s", self.goal_pose)
+            rospy.loginfo("final_robot_pose %s", self.final_robot_pose)
             self.goal_pub.publish(self.goal_pose)
             self.execute = False
             return
