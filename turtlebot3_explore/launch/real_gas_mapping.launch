@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <!-- launch eco2 to gas node -->
-  <node pkg="turtlebot3_explore" type="get_co2.py" name="get_co2" />
+  <arg name="use_tvoc" default="false" />
+
+  <!-- launch tvoc to gas node -->
+  <node pkg="turtlebot3_explore" type="get_tvoc.py" name="get_tvoc" if="$(arg use_tvoc)" />
+
+  <!--  OR launch eco2 to gas node -->
+  <node pkg="turtlebot3_explore" type="get_co2.py" name="get_co2" unless="$(arg use_tvoc)" />
+
   <!-- launch gas_mapping node -->
 
   <node pkg="turtlebot3_explore" type="gas_mapping_tf.py" name="gas_mapping">
