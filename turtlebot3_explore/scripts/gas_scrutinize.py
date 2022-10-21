@@ -14,10 +14,10 @@ from nav_msgs.msg import OccupancyGrid
 # if scan_val is Inf, inf_distance is assigned.
 inf_distance = 5.0
 # the radius of the robot explore area
-territory_radius = 1.0
+territory_radius = 0.4
 half_of_scan_size = 30
 # the velocity of exploring and the type of explore state
-explore_vel = 0.3
+explore_vel = 0.20
 explore_time = 0.5
 explore_yaw_vel = 2.0
 explore_yaw_time = 1.0
@@ -45,7 +45,7 @@ class gas_scrutinize:
         
         # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
 
-        self.timeout_sec = rospy.get_param("~timeout_sec", 15.0)
+        self.timeout_sec = rospy.get_param("~timeout_sec", 30.0)
 
         self.start_time = 0
         self.max_gas_value = 0.0
@@ -128,7 +128,7 @@ class gas_scrutinize:
             return
 
         last_sec = (rospy.get_time() - self.max_gas_value_time)
-        # rospy.loginfo_throttle(1.0, "last_sec: %f", last_sec)
+        rospy.loginfo_throttle(1.0, "last_sec: %f", last_sec)
         if last_sec  > self.timeout_sec:
             rospy.logwarn_once("Robot discovered goal!")
             self.explore_state = "explored"
@@ -155,7 +155,7 @@ class gas_scrutinize:
         front_dists = msg.ranges[:half_of_scan_size]+ msg.ranges[(size - half_of_scan_size):]
         front_dist = min(list(map(lambda x: inf_distance if (x == float('inf') or x == 0.0
         ) else x, front_dists)))
-        rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
+        # rospy.loginfo_throttle(1.0, "minimum front distance: %f", front_dist)
 
         if self.before_gas_value < self.gas_value:
             self.explore_state = 'front'
@@ -164,11 +164,11 @@ class gas_scrutinize:
             self.cmd_x = 0.0
             self.cmd_yaw = 0.5
             self.explore_state = 'front'
-            rospy.loginfo_throttle(1.0, 'state: avoiding obstacle',)
+            # rospy.loginfo_throttle(1.0, 'state: avoiding obstacle',)
         else:
             self.cmd_yaw = 0.0
             self.cmd_x = 0.0
-            rospy.loginfo_throttle(1.0, 'state: %s', self.explore_state)
+            # rospy.loginfo_throttle(1.0, 'state: %s', self.explore_state)
             self.explore()
 
         cmd_msg = Twist()

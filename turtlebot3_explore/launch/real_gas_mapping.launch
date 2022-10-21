@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <arg name="use_tvoc" default="false" />
+  <arg name="use_tvoc" default="true" />
 
   <!-- launch tvoc to gas node -->
   <node pkg="turtlebot3_explore" type="get_tvoc.py" name="get_tvoc" if="$(arg use_tvoc)" />
