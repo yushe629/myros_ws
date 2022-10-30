@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import secrets
 import rospy
 import math
 import tf
@@ -38,7 +39,8 @@ class gas_patrol:
             return
         if msg.status.status == 3:
             rospy.loginfo("%s", msg.status.text)
-            rospy.sleep(1.0)
+            # wait 2 sec for more sensing
+            rospy.sleep(3.0)
             self.is_moving = False
             self.is_goal_published = False
             if self.nth_point == len(self.relay_points):
