@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import imp
 import rospy
 import message_filters
 import math

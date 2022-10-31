@@ -12,12 +12,16 @@ class get_co2:
         self.eco2_sub = rospy.Subscriber("/tvoc", UInt16, self.callback)
         # self.norm = rospy.get_param("~norm", 10.0)
         # for test, setting norm = 5.0
+        # gas map data must be less than 127
         self.norm = 10.0
         rospy.spin()
         
     def callback(self, msg):
         gas_msg = Float32()
-        gas_msg.data = float(msg.data)/self.norm
+        if msg.data > 1000:
+            gas_msg.data = 100
+        else:
+            gas_msg.data = float(msg.data)/self.norm
         self.gas_pub.publish(gas_msg)
 
 if __name__ == "__main__":

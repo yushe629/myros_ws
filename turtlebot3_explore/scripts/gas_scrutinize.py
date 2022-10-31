@@ -121,7 +121,7 @@ class gas_scrutinize:
 
         if self.start_time == 0:
             self.start_time = rospy.get_time()
-            self.max_gas_value_time = rospy.time()
+            self.max_gas_value_time = rospy.get_time()
             return
 
         if self.explore_state == "explored":
