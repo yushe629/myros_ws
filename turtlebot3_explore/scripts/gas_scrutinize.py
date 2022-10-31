@@ -66,6 +66,9 @@ class gas_scrutinize:
     def search_callback(self, msg):
         self.execute = msg.data
         self.start_time = rospy.get_time()
+        # for debug
+        self.max_gas_value_time = rospy.get_time()
+        rospy.loginfo("execute: at %s", rospy.get_time())
 
     # def odom_callback(self, msg):
     #     if not self.execute:
@@ -122,6 +125,7 @@ class gas_scrutinize:
         if self.start_time == 0:
             self.start_time = rospy.get_time()
             self.max_gas_value_time = rospy.get_time()
+            rospy.loginfo("In callback set start_time at %s", rospy.get_time)
             return
 
         if self.explore_state == "explored":

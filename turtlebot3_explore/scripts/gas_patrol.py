@@ -38,8 +38,8 @@ class gas_patrol:
             return
         if msg.status.status == 3:
             rospy.loginfo("%s", msg.status.text)
-            # wait 2 sec for more sensing
-            rospy.sleep(3.0)
+            # wait 4 sec for more sensing
+            rospy.sleep(4.0)
             self.is_moving = False
             self.is_goal_published = False
             if self.nth_point == len(self.relay_points):
