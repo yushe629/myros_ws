@@ -18,10 +18,12 @@ class get_co2:
         
     def callback(self, msg):
         gas_msg = Float32()
-        if msg.data > 1000:
-            gas_msg.data = 100
-        else:
-            gas_msg.data = float(msg.data)/self.norm
+        # /tvoc data type is UInt16 and /gas data should be Int8 for OccupancyGrid data
+        gas_msg.data = float(msg.data)/600
+        # if msg.data > 1000:
+        #     gas_msg.data = 100
+        # else:
+        #     gas_msg.data = float(msg.data)/self.norm
         self.gas_pub.publish(gas_msg)
 
 if __name__ == "__main__":
