@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="bag_file_name" default="wireless_bag" />
+    <arg name="m5stack_1_port" value="11411" />
+    <arg name="m5stack_2_port" value="11412" />
+    <arg name="m5stack_3_port" value="11413" />
+    <arg name="m5stack_4_port" value="11414" />
+    <!-- run serial_node  -->
+    <!-- If this node can't work, please comment out the following line -->
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" ns="m5stack_1" output="screen">
+        <param name="port" value="tcp" />
+        <param name="tcp_port" value="$(arg m5stack_1_port)" />
+    </node>
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" ns="m5stack_2" output="screen">
+        <param name="port" value="tcp" />
+        <param name="tcp_port" value="$(arg m5stack_2_port)" />
+    </node>
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" ns="m5stack_3" output="screen">
+        <param name="port" value="tcp" />
+        <param name="tcp_port" value="$(arg m5stack_3_port)" />
+    </node>
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" ns="m5stack_4" output="screen">
+        <param name="port" value="tcp" />
+        <param name="tcp_port" value="$(arg m5stack_4_port)" />
+    </node>
+    <!-- Record bag -->
+    <node name="bag_record" pkg="rosbag" type="record"
+        args="record -a -O $(find gas_distribution)/resources/bag/$(arg bag_file_name).bag
+        /m5stack_1
+        /m5stack_2
+        /m5stack_3
+        /m5stack_4
+        " />
+</launch>
