@@ -31,5 +31,6 @@
         /m5stack_3
         /m5stack_4
         /pwm_test
+        /mocap/pose
         " />
 </launch>
