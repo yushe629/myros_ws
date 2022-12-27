@@ -6,7 +6,7 @@ from aerial_robot_msgs.msg import FlightNav
 def move_as_pose_z(target_pos_z):
     pub = rospy.Publisher("/quadrotor/uav/nav", FlightNav, queue_size=1)
 
-    rospy.sleep(1.0)
+    rospy.sleep(3.0)
     
     msg = FlightNav()
     msg.pos_z_nav_mode = 2
