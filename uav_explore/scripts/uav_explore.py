@@ -9,11 +9,11 @@ from std_msgs.msg import UInt16, Bool
 from move_as_pos_z import move_as_pose_z
 
 # Constants
-INITIAL_HEIGHT = 1.0
-MAX_HEIGHT = 1.5
-POSE_Z_DIFF = 0.1
-# For ignoring noise, using weight.
-TVOC_WEIGHT = 0.8
+# INITIAL_HEIGHT = 1.0
+# MAX_HEIGHT = 1.5
+# POSE_Z_DIFF = 0.1
+# # For ignoring noise, using weight.
+# TVOC_WEIGHT = 0.8
 
 class uav_explore:
     def __init__(self):
