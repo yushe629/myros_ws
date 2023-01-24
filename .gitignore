@@ -58,5 +58,7 @@ CATKIN_IGNORE
 
 /turtlebot3_explore/resources/bag/*
 /gas_distribution/resources/bag/*
+/uav_explore/resources/bag/*
+
 
 !.gitkeep

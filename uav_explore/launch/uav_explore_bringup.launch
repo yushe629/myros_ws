@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- set uav_explore param -->
+  <rosparam file="$(find uav_explore)/param/uav_explore.yaml" command="load" />
+  <!-- uav_response node -->
+  <node name="uav_response" pkg="uav_explore" type="uav_response.py" output="screen" />
+  <!-- vertical gas map node -->
+  <!-- <node name="vertical_gas_map" pkg="uav_explore" type="vertical_gas_map.py" /> --> --> -->
+</launch>
