@@ -31,6 +31,12 @@ END_TIME = 1670316979
 EXPLORE_START_SEC = 1674028126
 EXPLORE_START_NSEC = 322000000
 
+TRUE_PEAK_SEC = 1674028180
+TRUE_PEAK_NSEC = 114945800
+
+SCAN_START_SEC = 1674028140
+
+
 EXPLORE_END_SEC = 1674028196
 
 MAX_TIME = 1670316928.392
@@ -44,6 +50,8 @@ uav_height_data = None
 
 uav_nav_data = None
 
+scannning_data = None
+
 for topic, msg, t in bag.read_messages():
     if t.secs > EXPLORE_START_SEC and t.secs < EXPLORE_END_SEC:
         if topic=="/quadrotor/tvoc":
@@ -55,6 +63,11 @@ for topic, msg, t in bag.read_messages():
                 tvoc_data=sensor_data
             else:
                 tvoc_data=np.append(tvoc_data,sensor_data,axis=0)
+            if t.secs > SCAN_START_SEC:
+                if scannning_data is None:
+                    scannning_data = sensor_data
+                else:
+                    scannning_data=np.append(scannning_data,sensor_data,axis=0)
         if topic=="/quadrotor/mocap/pose":
             mocap_data=np.array([[0.0, 0.0, 0.0]])
             mocap_data[0,0]=msg.pose.position.z
@@ -89,6 +102,9 @@ print(max_height_data)
 dataset = [tvoc_data, uav_height_data]
 
 
+scanned_index = np.argmax(scannning_data[:,0])
+scanned_peak_data = scannning_data[scanned_index, :]
+
 # # # reform time
 # start_sec = min([tvoc_data[0,1], uav_height_data[0,2]])
 # start_nsec = min([tvoc_data[0,2], uav_height_data[0,2]])
@@ -117,7 +133,7 @@ plt.rcParams['xtick.labelsize'] = SMALL_SIZE
 plt.rcParams['ytick.labelsize'] = SMALL_SIZE
 plt.rcParams['axes.titlesize'] = LARGE_SIZE
 plt.rcParams['axes.labelsize'] = MEDIUM_SIZE
-plt.rcParams['legend.fontsize'] = SMALL_SIZE
+plt.rcParams['legend.fontsize'] = 14
 plt.rcParams['figure.titlesize'] = LARGE_SIZE
 # plt.rcParams["font.size"] = 15
 # plt.rcParams['xtick.labelsize'] = 9
@@ -154,22 +170,26 @@ fig.subplots_adjust(hspace=0.8, wspace=0.4)
 fig1 = fig.add_subplot(211)
 # fig1.set_title("uav height")
 fig1.plot(toFormatedTime(uav_height_data[:,1], uav_height_data[:,2]), uav_height_data[:,0], 'g')
-fig1.axvline(peak_time, color='k', lineStyle='dotted', label="peak time")
 # tmp: explore time has to be rechecked.
-# fig1.axvline(toFormatedTime(explore_start_data[1], explore_start_data[2]), color='b', lineStyle='dotted', label="explore start")
+fig1.axvline(peak_time, color='b', lineStyle='dotted', label="whole peak")
+fig1.axvline(toFormatedTime(explore_start_data[1], explore_start_data[2]), color='k', lineStyle='dotted', label="start of scanning")
+fig1.axvline(toFormatedTime(scanned_peak_data[1], scanned_peak_data[2]), color='c', lineStyle='dotted', label="peak in scanning")
 fig1.set_xlabel("time [s]")
 fig1.set_ylabel("uav height [m]")
 # fig1.legend(loc='lower right')
-fig1.legend(bbox_to_anchor=(1.35,1), loc="upper right", borderaxespad=0)
+# fig1.legend(bbox_to_anchor=(1.35,1), loc="upper right", borderaxespad=0)
+fig1.legend()
 
 fig2 = fig.add_subplot(212)
 # fig2.set_title("gas value")
 fig2.plot(toFormatedTime(tvoc_data[:,1], tvoc_data[:,2]), tvoc_data[:,0], 'r')
-fig2.axvline(peak_time, color='k', lineStyle='dotted', label="peak time")
-# fig2.axvline(toFormatedTime(explore_start_data[1], explore_start_data[2]), color='b', lineStyle='dotted', label="explore start")
+fig2.axvline(peak_time, color='b', lineStyle='dotted', label="whole peak")
+fig2.axvline(toFormatedTime(explore_start_data[1], explore_start_data[2]), color='k', lineStyle='dotted', label="start of scanning")
+fig2.axvline(toFormatedTime(scanned_peak_data[1], scanned_peak_data[2]), color='c', lineStyle='dotted', label="peak in scanning")
 fig2.set_xlabel("time [s]")
 fig2.set_ylabel("gas value [ppd]")
 # fig2.legend(loc='lower right')
+fig2.legend()
 
 
 
