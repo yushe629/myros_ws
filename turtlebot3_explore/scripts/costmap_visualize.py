@@ -54,7 +54,7 @@ class refine_gas_map:
         
         # tvoc to map value
         map_value = tvoc_value//2
-        map_value = map_value - 30
+        # map_value = map_value - 30
         if map_value > 127:
             map_value = 127
         
