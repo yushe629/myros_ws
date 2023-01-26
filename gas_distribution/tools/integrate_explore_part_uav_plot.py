@@ -93,17 +93,19 @@ max_tvoc_data = tvoc_data[max_index, :]
 
 explore_start_data = uav_nav_data[0]
 
-max_height_index = np.where(uav_height_data[:,1] == max_tvoc_data[1])[0][0]
-max_height_data = uav_height_data[max_height_index, :]
-max_height_value = max_height_data[0]
-
-print(max_height_data)
 
 dataset = [tvoc_data, uav_height_data]
 
 
 scanned_index = np.argmax(scannning_data[:,0])
 scanned_peak_data = scannning_data[scanned_index, :]
+
+max_height_index = np.where((uav_height_data[:,1] == scanned_peak_data[1]) & (uav_height_data[:,2] > scanned_peak_data[2]))[0][0]
+max_height_data = uav_height_data[max_height_index, :]
+max_height_value = max_height_data[0]
+
+print(max_height_data)
+# print(scanned_peak_data)
 
 # # # reform time
 # start_sec = min([tvoc_data[0,1], uav_height_data[0,2]])
@@ -164,7 +166,7 @@ plt.rcParams["legend.edgecolor"] = 'black'
 # plt.rcParams["legend.borderaxespad"] = 0.
 
 fig = plt.figure(figsize=(9,6), facecolor="white")
-fig.subplots_adjust(hspace=0.8, wspace=0.4)
+fig.subplots_adjust(hspace=0.05, wspace=0.4)
 
 
 fig1 = fig.add_subplot(211)
@@ -174,7 +176,9 @@ fig1.plot(toFormatedTime(uav_height_data[:,1], uav_height_data[:,2]), uav_height
 fig1.axvline(peak_time, color='b', lineStyle='dotted', label="whole peak")
 fig1.axvline(toFormatedTime(explore_start_data[1], explore_start_data[2]), color='k', lineStyle='dotted', label="start of scanning")
 fig1.axvline(toFormatedTime(scanned_peak_data[1], scanned_peak_data[2]), color='c', lineStyle='dotted', label="peak in scanning")
-fig1.set_xlabel("time [s]")
+# fig1.axhline(max_height_value, color="m", lineStyle="dashed")
+# fig1.set_xlabel("time [s]")
+fig1.xaxis.set_visible(False)
 fig1.set_ylabel("uav height [m]")
 # fig1.legend(loc='lower right')
 # fig1.legend(bbox_to_anchor=(1.35,1), loc="upper right", borderaxespad=0)
