@@ -21,10 +21,6 @@ print(filename)
 START_TIME = 1670316905
 END_TIME = 1670316979
 
-EXPLORE_START_SEC  = 1672129583
-EXPLORE_START_NSEC = 674000000
-EXPLORE_END_SEC = 1672129641
-
 MAX_TIME = 1670316928.392
 
 
@@ -33,36 +29,27 @@ bag = rosbag.Bag(filename)
 
 tvoc_data = None
 uav_height_data = None
-teleop_start_data = None
 
 for topic, msg, t in bag.read_messages():
-    if t.secs > EXPLORE_START_SEC and t.secs < EXPLORE_END_SEC:
-        if topic=="/quadrotor/tvoc":
+    if t.secs > START_TIME and t.secs < END_TIME:
+        if topic=="/m5stack_1/tvoc":
             sensor_data=np.array([[0.0, 0.0, 0.0]])
             sensor_data[0,0]=msg.data
-            sensor_data[0,1]=t.secs
+            sensor_data[0,1]=t.secs - START_TIME
             sensor_data[0,2]=t.nsecs
             if tvoc_data is None:
                 tvoc_data=sensor_data
             else:
                 tvoc_data=np.append(tvoc_data,sensor_data,axis=0)
-        if topic=="/quadrotor/mocap/pose":
+        if topic=="/mocap/pose":
             mocap_data=np.array([[0.0, 0.0, 0.0]])
             mocap_data[0,0]=msg.pose.position.z
-            mocap_data[0,1]=t.secs
+            mocap_data[0,1]=t.secs - START_TIME
             mocap_data[0,2]=t.nsecs
             if uav_height_data is None:
                 uav_height_data=mocap_data
             else:
                 uav_height_data=np.append(uav_height_data,mocap_data,axis=0)
-        if topic=="/quadrotor/teleop_command/start":
-            start_data=np.array([[0.0, 0.0, 0.0]])
-            start_data[0,1]=t.secs
-            start_data[0,2]=t.nsecs
-            if teleop_start_data is None:
-                teleop_start_data=start_data
-            else:
-                    teleop_start_data=np.append(teleop_start_data,start_data,axis=0)
 
 max_index = np.argmax(tvoc_data[:,0])
 max_tvoc_data = tvoc_data[max_index, :]
@@ -74,27 +61,46 @@ max_tvoc_data = tvoc_data[max_index, :]
 
 max_height_index = np.where(uav_height_data[:,1] == max_tvoc_data[1])[0][0]
 max_height_data = uav_height_data[max_height_index, :]
-max_height_value = max_height_data[0]
 
 # print(max_height_data)
 
-dataset = [tvoc_data, uav_height_data]
+# dataset = [tvoc_data, uav_height_data]
+dataset = None
 
+# print(len(tvoc_data)) 373
+# print(len(uav_height_data)) 4995
+for tvoc_datum in tvoc_data:
+    new_datum =np.array([[0.0, 0]])
+    new_datum[0,0] = tvoc_datum[0]
+    time_diff = None
+    for height_datum in uav_height_data:
+        if height_datum[1] == tvoc_datum[1]:
+            if time_diff is None or time_diff > abs(tvoc_datum[2] - height_datum[2]):
+                new_datum[0,1] = height_datum[0]
+                time_diff = abs(tvoc_datum[2] - height_datum[2])
+    if dataset is None:
+        dataset = new_datum
+    else:
+        dataset =np.append(dataset, new_datum, axis=0)
 
-# # # reform time
-# start_sec = min([tvoc_data[0,1], uav_height_data[0,2]])
-# start_nsec = min([tvoc_data[0,2], uav_height_data[0,2]])
+max_index = np.argmax(dataset[:,0])
+max_height = dataset[max_index, 1]
+print(max_height)
+# print(dataset)
+
+# # reform time
+# start_sec= min([tvoc_data2[0,1], tvoc_data3[0,1], tvoc_data4[0,1]])
+# start_nsec= min([tvoc_data2[0,2], tvoc_data3[0,2], tvoc_data4[0,2]])
+# print(start_sec)
+# print(start_nsec)
+
+# for i in range(tvoc_data2):
 
 
 def toRawTime(sec, nsec):
     return sec + nsec/1000000000.0
 
-
-def toFormatedTime(sec, nsec):
-    return toRawTime(sec, nsec)- toRawTime(EXPLORE_START_SEC, EXPLORE_START_NSEC)
-
-peak_time = toFormatedTime(max_tvoc_data[1], max_tvoc_data[2])
-
+peak_time = toRawTime(max_tvoc_data[1], max_tvoc_data[2])
 
 SMALL_SIZE = 20
 MEDIUM_SIZE = 24
@@ -143,42 +149,27 @@ fig = plt.figure(figsize=(9,6), facecolor="white")
 fig.subplots_adjust(hspace=0.8, wspace=0.4)
 
 
-# fig1 = fig.add_subplot(211)
-# # fig1.set_title("uav height")
-# fig1.plot(toFormatedTime(uav_height_data[:,1], uav_height_data[:,2]), uav_height_data[:,0], 'g')
-# fig1.axvline(peak_time, color='k', lineStyle='dotted', label="peak time")
-# fig1.set_xlabel("time [s]")
-# fig1.set_ylabel("uav height [m]")
-# # fig1.legend(loc='lower right')
+fig1 = fig.add_subplot(111)
+# fig1.set_title("tvoc value - uav height")
+# fig1.plot(dataset[:,0], dataset[:,1], 'k')
+fig1.scatter(dataset[:,0], dataset[:,1], c="k", s=10)
+# fig1.axvline(peak_time, color='k', lineStyle='dotted', label="peak_time")
+fig1.set_xlabel("gas value [ppd]")
+fig1.set_ylabel("uav height [m]")
 # fig1.legend(bbox_to_anchor=(1.32,1), loc="upper right", borderaxespad=0)
 
 # fig2 = fig.add_subplot(212)
-# # fig2.set_title("gas value")
-# fig2.plot(toFormatedTime(tvoc_data[:,1], tvoc_data[:,2]), tvoc_data[:,0], 'r')
-# fig2.axvline(peak_time, color='k', lineStyle='dotted', label="peak time")
+# fig2.set_title("gas value")
+# fig2.plot(toRawTime(tvoc_data[:,1], tvoc_data[:,2]), tvoc_data[:,0], 'r')
+# fig2.axvline(peak_time, color='k', lineStyle='dotted', label="peak_time")
 # fig2.set_xlabel("time [s]")
 # fig2.set_ylabel("gas value [ppd]")
-# # fig2.legend(loc='lower right')
-
-
-fig1 = fig.add_subplot(111)
-
-# fig1.set_title("spinning propeller on ground")
-fig1.plot(toFormatedTime(tvoc_data[:,1], tvoc_data[:,2]), tvoc_data[:,0], 'k')
-fig1.axvline(toFormatedTime(teleop_start_data[0,1], teleop_start_data[0,2]), color='r', lineStyle='dotted', label="propeller start")
-# fig1.axvline(toFormatedTime(teleop_halt_data[0,1], teleop_halt_data[0,2]), color='b', lineStyle='dotted', label="propeller stop")
-fig1.set_xlabel("time [s]")
-fig1.set_ylabel("gas value [ppd]")
-# fig1.legend(loc="upper left")
-# fig1.legend(bbox_to_anchor=(1.38,1), loc="upper right", borderaxespad=0)
-
-
-
+# fig2.legend(loc='upper right')
 
 
 # save
 plt.show()
-# fig.savefig('uav_explore.eps', bbox_inches="tight", pad_inches=0.05)
-# fig.savefig('uav_explore.pdf', bbox_inches="tight", pad_inches=0.05)
+# fig.savefig('uav_updown_subexp.eps', bbox_inches="tight", pad_inches=0.05)
+# fig.savefig('uav_upd_subexp.pdf', bbox_inches="tight", pad_inches=0.05)
 
 bag.close()
