@@ -1,0 +1,24 @@
+<launch>
+  <arg name="plan_file_short_hand" default="debug_points.yaml" />
+  <arg name="plan_file" default="$(find turtlebot3_explore)/param/$(arg plan_file_short_hand)" />
+
+  <!-- launch gas_patrol node -->
+  <node pkg="turtlebot3_explore" type="gas_patrol.py" name="gas_patrol">
+    <rosparam command="load" file="$(arg plan_file)" />
+  </node>
+
+  <!-- launch gas_mapping node
+  <node pkg="turtlebot3_explore" type="gas_mapping_tf.py" name="gas_mapping">
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node> -->
+
+  <!-- launch gas_explore <node>s -->
+  <node pkg="turtlebot3_explore" type="gas_roughly_search.py" name="gas_roughly_search" output="screen">
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load"/>
+  </node>
+  <node pkg="turtlebot3_explore" type="gas_scrutinize.py" name="gas_scrutinize" output="screen"/>
+
+  <!-- <node pkg="rviz" type="rviz" name="gas_rviz" required="true" -->
+  <!--       args="-d $(find turtlebot3_explore)/config/gas_explore.rviz"/> -->
+
+</launch>

@@ -11,7 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  sensor_msgs
   tf
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -23,8 +25,21 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 #catkin_python_setup()
 
+## Generate messages in the 'msg' folder
+add_message_files(
+   FILES
+   PositionAndGas.msg
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+)
 
 catkin_package(
+  CATKIN_DEPENDS roscpp rospy tf message_runtime sensor_msgs std_msgs
 )
 
 ## Your package locations should be listed before other locations

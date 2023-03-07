@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="bag_file_name" default="my_bag"/>
+    <arg name="time_rate" default="1.0" />
+    <node pkg="rosbag" type="play" name="rosbag_play" output="screen" args="--clock -r $(arg time_rate) $(find turtlebot3_explore)/resources/bag/$(arg bag_file_name).bag -l"/>
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot3_explore)/config/bagplay.rviz" required="true" /> -->
+</launch>

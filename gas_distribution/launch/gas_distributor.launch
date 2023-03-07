@@ -1,0 +1,18 @@
+<launch>
+  <!-- gas distributon -->
+  <arg name="use_unsteady_gas" default="false" />
+  <group if="$(arg use_unsteady_gas)" >
+    <node pkg="gas_distribution" type="gas_distributor_unsteady.py" name="gas_distributer" output="screen" >
+      <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+    </node>
+    <node pkg="gas_distribution" type="global_gas_map.py" name="global_gas_map">
+      <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+    </node>
+  </group>
+  <group unless="$(arg use_unsteady_gas)">
+    <node pkg="gas_distribution" type="gas_distributor_tf.py" name="gas_distributor" output="screen" >
+      <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+          <!-- <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" /> -->
+    </node>
+  </group>
+</launch>

@@ -50,3 +50,15 @@ qtcreator-*
 # Catkin custom files
 CATKIN_IGNORE
 .catkin_tools
+
+#VSCode
+.vscode
+
+/gas_distribution/maps/*
+
+/turtlebot3_explore/resources/bag/*
+/gas_distribution/resources/bag/*
+/uav_explore/resources/bag/*
+/gas_distribution/tools/*.sh
+
+!.gitkeep

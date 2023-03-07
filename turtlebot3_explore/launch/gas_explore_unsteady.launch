@@ -1,0 +1,28 @@
+<launch>
+
+  <arg name="use_virtual_gas" default="false" />
+
+  # generate gas virtual distributer if necessary
+  <node pkg="gas_distribution" type="gas_distributer_unsteady.py" name="gas_distributer" output="screen" if="$(arg use_virtual_gas)">
+    <rosparam>
+      gas_visual_map_resolution: 0.2
+      gas_visual_map_origin: [-5.0, -5.0, 0]
+      gas_visual_scale: 1.0
+      gas_visual_offset: 10.0
+    </rosparam>
+  </node>
+  # generate gas virtual distributer if necessary
+  <node pkg="turtlebot3_explore" type="gas_explore.py" name="gas_explore" output="screen">
+    <rosparam>
+      gas_visual_map_resolution: 0.2
+      gas_visual_map_origin: [-5.0, -5.0, 0]
+      gas_visual_scale: 1.0
+      gas_visual_offset: 10.0
+    </rosparam>
+  </node>
+
+  # visualize the gas map
+  <node pkg="rviz" type="rviz" name="$(anon rviz)"
+        args="-d $(find turtlebot3_explore)/config/gas_visualize.rviz"/>
+
+</launch>

@@ -1,0 +1,106 @@
+<launch>
+
+  <arg name="robot_type" default="turtlebot" />
+  <arg name="use_teleop" default="false" />
+
+  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
+  <arg name="initial_pose_x" default="-2.0"/>
+  <arg name="initial_pose_y" default="-0.5"/>
+  <arg name="initial_pose_a" default="0.0"/>
+
+  <arg name="move_forward_only" default="false"/>
+
+  <!-- gas distributon -->
+  <arg name="use_unsteady_gas" default="false" />
+  <node pkg="gas_distribution" type="gas_distributer_unsteady.py" name="gas_distributer" output="screen" if="$(arg use_unsteady_gas)" >
+    <!-- <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" /> -->
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node>
+  <node pkg="gas_distribution" type="gas_distributer.py" name="gas_distributer" output="screen" unless="$(arg use_unsteady_gas)" >
+    <!-- <param name="gas_visual_param" value="$(find gas_distribution)/param/gas_visual_param.yaml" /> -->
+    <rosparam file="$(find gas_distribution)/param/gas_visual_param.yaml" command="load" />
+  </node>
+
+  <!-- use turtlebot3 -->
+  <group if="$(eval robot_type == 'turtlebot')">
+    <!-- bringup the turtlebot in gazebo -->
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch" />
+
+    <!-- use keyboard teleop -->
+    <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard"
+          output="screen" launch-prefix="xterm -e" if="$(arg use_teleop)" />
+
+    <!-- robot model -->
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch" />
+
+    <!-- AMCL -->
+    <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+      <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+      <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+      <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+    </include>
+
+    <!-- Map server -->
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <!-- move_base -->
+    <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+      <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    </include>
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find gas_distribution)/config/gas_distribution.rviz"/>
+
+  </group>
+
+  <!-- use aibot -->
+  <group if="$(eval robot_type == 'aibot')">
+    <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
+    <!-- Map server -->
+    <arg name="map_file" default="$(find gas_distribution)/maps/map.yaml"/>
+    <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
+
+    <!-- amcl -->
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+      <param name="base_frame_id" value="base_link"/>
+      <param name="gui_publish_rate" value="10.0"/>
+      <param name="kld_err" value="0.05"/>
+      <param name="kld_z" value="0.99"/>
+      <param name="laser_lambda_short" value="0.1"/>
+      <param name="laser_likelihood_max_dist" value="2.0"/>
+      <param name="laser_max_beams" value="60"/>
+      <param name="laser_model_type" value="likelihood_field"/>
+      <param name="laser_sigma_hit" value="0.2"/>
+      <param name="laser_z_hit" value="0.5"/>
+      <param name="laser_z_short" value="0.05"/>
+      <param name="laser_z_max" value="0.05"/>
+      <param name="laser_z_rand" value="0.5"/>
+      <param name="max_particles" value="2000"/>
+      <param name="min_particles" value="500"/>
+      <param name="odom_alpha1" value="0.25"/>
+      <param name="odom_alpha2" value="0.25"/>
+      <param name="odom_alpha3" value="0.25"/>
+      <param name="odom_alpha4" value="0.25"/>
+      <param name="odom_alpha5" value="0.1"/>
+      <param name="odom_frame_id" value="odom"/>
+      <param name="odom_model_type" value="omni"/>
+      <param name="recovery_alpha_slow" value="0.001"/>
+      <param name="recovery_alpha_fast" value="0.1"/>
+      <param name="resample_interval" value="1"/>
+      <param name="transform_tolerance" value="1.25"/>
+      <param name="update_min_a" value="0.2"/>
+      <param name="update_min_d" value="0.2"/>
+    </node>
+
+    <!-- move_base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <rosparam file="$(find navigation_demo)/param/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find navigation_demo)/param/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find navigation_demo)/param/navigation/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find navigation_demo)/param/navigation/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find navigation_demo)/param/navigation/base_local_planner_default_params.yaml" command="load" />
+      <rosparam file="$(find navigation_demo)/param/navigation/move_base_params.yaml" command="load" />
+    </node>
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_demo)/rviz/navigation.rviz" />
+  </group>
+</launch>

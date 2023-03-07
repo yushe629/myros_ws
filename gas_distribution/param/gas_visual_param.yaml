@@ -1,0 +1,5 @@
+gas_visual_map_resolution: 0.2
+gas_visual_map_origin: [-5.0, -5.0, 0]
+gas_visual_scale: 1.0
+gas_visual_offset: 10.0
+gas_origin: [2.0, 0.5, 0]

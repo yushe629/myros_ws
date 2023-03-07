@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="rviz" type="rviz" name="global_gas_rviz" required="true"
+        args="-d $(find turtlebot3_explore)/config/global_gas.rviz"/>
+  <node pkg="rviz" type="rviz" name="local_gas__rviz" required="true"
+        args="-d $(find turtlebot3_explore)/config/local_gas.rviz"/>
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+
+  <node pkg="turtlebot3_explore" type="aibot_gas_explore.py" name="gas_explore" output="screen">
+    <rosparam>
+      gas_visual_map_resolution: 0.2
+      gas_visual_map_origin: [-5.0, -5.0, 0]
+      gas_visual_scale: 1.0
+      gas_visual_offset: 10.0
+    </rosparam>
+  </node>
+
+  # visualize the gas map
+  <node pkg="rviz" type="rviz" name="$(anon rviz)"
+        args="-d $(find turtlebot3_explore)/config/gas_visualize.rviz"/>
+
+</launch>

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import rospy
+import tf
+import tf2_ros
 import math
 import numpy as np
 from sensor_msgs.msg import LaserScan
@@ -21,8 +23,12 @@ class GasDistributer:
         self.max_val = rospy.get_param("~gap_max_val", 100)
         self.gas_value_pub = rospy.Publisher("/gas", Float32, queue_size=10)
         self.gas_map_pub = rospy.Publisher("/true_gas_map", OccupancyGrid, queue_size=1)
-        self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        # self.robot_pose_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
 
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.rate = rospy.Rate(10.0)
+        
         # gas map for visualization
         self.gas_visual_map = OccupancyGrid()
         self.gas_visual_map.header.frame_id = "map"
@@ -42,6 +48,15 @@ class GasDistributer:
 
         self.map_gen()
         rospy.loginfo_once("gas_origin: %s", self.gas_origin)
+        
+        while not rospy.is_shutdown():
+            try:
+                t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
+                #t = tfBuffer.lookup_transform('mug', 'base_link', rospy.Time())
+                self.odom_callback(t.transform)
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+                print(e)
+                self.rate.sleep()
         rospy.spin()
 
     def calc_gas_value(self, pos):
@@ -52,7 +67,7 @@ class GasDistributer:
         return val
 
     def odom_callback(self, msg):
-        pos = msg.pose.pose.position
+        pos = msg.translation
         pos = np.array([pos.x, pos.y, pos.z])
         val = self.calc_gas_value(pos)
         rospy.loginfo("pos: %s", pos)
