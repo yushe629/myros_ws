@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>turtlebot3_explore</name>
+  <name>agv_explore</name>
   <version>0.0.0</version>
-  <description>The turtlebot3 exploration  package</description>
+  <description>The agv gas exploration  package</description>
 
-  <maintainer email="yukawa@todo.todo">yukawa</maintainer>
+  <maintainer email="yukawa@hnl.t.u-tokyo.ac.jp">yukawa</maintainer>
 
   <license>BSD</license>
 
@@ -31,6 +31,6 @@
   <exec_depend>turtlebot3_slam</exec_depend>
   <exec_depend>turtlebot3_navigation</exec_depend>
   <exec_depend>message_runtime</exec_depend>
-  <exec_depend>amcl</exec_depend>
+  <exec_depend>navigation</exec_depend>
 
 </package>
