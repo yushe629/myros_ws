@@ -48,21 +48,19 @@ class GasDistributer:
 
         self.map_gen()
         rospy.loginfo_once("gas_origin: %s", self.gas_origin)
-        
+
         while not rospy.is_shutdown():
             try:
                 t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
-                #t = tfBuffer.lookup_transform('mug', 'base_link', rospy.Time())
                 self.odom_callback(t.transform)
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 print(e)
-                self.rate.sleep()
+            self.rate.sleep()
         rospy.spin()
 
     def calc_gas_value(self, pos):
         # pos is 3d_array
         dist = np.linalg.norm(self.gas_origin - pos)
-        # val = self.max_val - self.alpha * dist**2
         val = self.max_val*math.exp(-dist**2)
         return val
 
@@ -70,7 +68,7 @@ class GasDistributer:
         pos = msg.translation
         pos = np.array([pos.x, pos.y, pos.z])
         val = self.calc_gas_value(pos)
-        rospy.loginfo("pos: %s", pos)
+        #rospy.loginfo("pos: %s", pos)
         value = Float32()
         value.data = val
         self.gas_value_pub.publish(value)

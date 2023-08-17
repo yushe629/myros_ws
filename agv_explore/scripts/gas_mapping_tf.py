@@ -45,21 +45,17 @@ class gas_mapping:
         # TODO How to use two or three subscribers
 
     def gas_callback(self,msg):
-        # set Odometry.pose.pose
-        # self.robot_pose = msg.pose.pose
         self.gas_value = msg.data
         try:
             t = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time(0))
-            #t = tfBuffer.lookup_transform('mug', 'base_link', rospy.Time())
             self.odom_callback(t.transform)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 print(e)
-                self.rate.sleep()
-        
+
     def odom_callback(self, msg):
         # Add gas map date to gas_map_array
         if self.gas_value != None:
-            # robot_pose = msg.pose.pose
+
             translation = msg.translation
             x = translation.x
             y = translation.y

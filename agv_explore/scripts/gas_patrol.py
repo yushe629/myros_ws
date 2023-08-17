@@ -2,55 +2,90 @@
 import rospy
 import math
 import tf
+import time
 from geometry_msgs.msg import PoseStamped, Quaternion
 from move_base_msgs.msg import MoveBaseActionResult
+from actionlib_msgs.msg import GoalStatus
 from tf.transformations import quaternion_from_euler
-from std_msgs.msg import Bool
-
-PI = math.pi
+from nav_msgs.msg import OccupancyGrid
+from std_msgs.msg import Bool, Empty
 
 class gas_patrol:
     def __init__(self):
 
         rospy.init_node("gas_patrol")
 
-        self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
         self.relay_points = rospy.get_param("~relay_points")
-        # self.relay_points = [[2.0, -0.5, 0, PI/2.0], [2.0, 0.5,0, PI], [-2.0, 0.5, 0, 3*PI/2.0], [-2.0, -0.5, 0, 0]]
-        self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.callback)
-        self.is_moving = False
-        self.nth_point = 0
-        self.is_goal_published = False
+        self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
+        self.finish_search = rospy.Publisher("/is_finish_search", Bool, queue_size = 1)
+        self.task_start_sub = rospy.Subscriber("/start_task", Empty, self.task_start_callback)
+        self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.waypoint_callback)
+        self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", OccupancyGrid, self.gas_map_callback)
+
         self.goal = PoseStamped()
         self.goal.header.frame_id = "map"
 
+        self.gas_map = None
+
+        rospy.sleep(1.0)
+
+        self.execute = False
+        self.nth_point = 0
+        self.reach_waypoint = True # for first waypoint
+        self.final_approach = False
+        self.patrol()
+
+
+        rospy.spin()
+
+    def task_start_callback(self, msg):
         self.execute = True
 
-        # publish topic for next node
-        self.is_finish_patrol_pub = rospy.Publisher("/is_finish_patrol", Bool, queue_size = 1)
-        
-        rospy.sleep(1.0)
-        self.patrol()
-        rospy.spin()
-        
-    def callback(self, msg):
-        if not self.execute:
-            return
-        if msg.status.status == 3:
-            rospy.loginfo("%s", msg.status.text)
+    def gas_map_callback(self, msg):
+        self.gas_map = msg
+
+    def waypoint_callback(self, msg):
+
+        rospy.logdebug("move base action status: %s", msg.status.text)
+
+        if msg.status.status == GoalStatus.SUCCEEDED:
+
+            if self.final_approach:
+                rospy.loginfo("reach the rought search point, switch to refine search phase")
+                self.finish_search.publish(Bool(True))
+                return
+
+            rospy.loginfo("reach the waypoint{}: {}".format(self.nth_point, self.relay_points[self.nth_point-1][:2]))
+
             # wait 4 sec for more sensing
             rospy.sleep(4.0)
-            self.is_moving = False
-            self.is_goal_published = False
+            self.reach_waypoint = True
+
+            # shift to rough search phase
             if self.nth_point == len(self.relay_points):
-                msg = Bool()
-                msg.data = True
-                self.is_finish_patrol_pub.publish(msg)
+
+                if self.gas_map is None:
+                    rospy.warn("no estimated gas map received yet !!!")
+                    return
+
+                mapdata = self.gas_map.data
+                mapindex = mapdata.index(max(mapdata))
+                target_x_pixel = mapindex % self.gas_map.info.width
+                target_y_pixel = mapindex / self.gas_map.info.width
+                target_x = target_x_pixel * self.gas_map.info.resolution + self.gas_map.info.origin.position.x
+                target_y = target_y_pixel * self.gas_map.info.resolution + self.gas_map.info.origin.position.y
+                target = PoseStamped()
+                target.header.frame_id = "map"
+                target.header.seq = target.header.seq + 1
+                target.header.stamp = rospy.Time.now()
+                self.calc_plan([target_x, target_y, 0, 0])
+                self.goal_pub.publish(self.goal)
+                rospy.loginfo("approach to the rough serach point: {}".format([target_x, target_y]))
+
                 self.execute = False
 
-        else:
-            rospy.loginfo("%s",msg.status.text)
-            
+                self.final_approach = True
+
     def calc_plan(self, point):
         self.goal.header.seq = self.goal.header.seq + 1
         self.goal.header.stamp = rospy.Time.now()
@@ -62,18 +97,25 @@ class gas_patrol:
         self.goal.pose.orientation.y = q[1]
         self.goal.pose.orientation.z = q[2]
         self.goal.pose.orientation.w = q[3]
-        
+
     def patrol(self):
-        if not self.execute:
-            return
-        while self.nth_point < len(self.relay_points):
-            if not self.is_moving:
-                if not self.is_goal_published:
-                    self.calc_plan(self.relay_points[self.nth_point])
-                    self.nth_point = self.nth_point+1
-                    self.goal_pub.publish(self.goal)
-                    self.is_goal_published = True
-                    self.is_moving = True
+
+        while self.nth_point < len(self.relay_points) and not rospy.is_shutdown():
+
+            if not self.execute:
+                rospy.sleep(0.01)
+                continue
+
+            if not self.reach_waypoint:
+                rospy.sleep(0.01)
+                continue
+
+            # move to the next waypoint
+            self.calc_plan(self.relay_points[self.nth_point])
+            self.nth_point += 1
+            self.reach_waypoint = False
+            self.goal_pub.publish(self.goal)
+
 
 if __name__ == "__main__":
     try:

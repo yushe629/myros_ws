@@ -4,6 +4,7 @@
 
   <arg name="use_slam" default="false" />
   <arg name="slam_methods" default="gmapping"/>
+  <arg name="rviz" default="false" />
 
   <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
   <arg name="initial_pose_x" default="0.0"/>
@@ -40,7 +41,7 @@
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
     <!-- rviz -->
-    <node pkg="rviz" type="rviz" name="rviz" required="true"
+    <node pkg="rviz" type="rviz" name="rviz" required="true" if="$(arg rviz)"
           args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
   </group>
 
@@ -48,6 +49,11 @@
   <!-- move_base -->
   <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
     <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+  <!-- gas distributor -->
+  <include file="$(find gas_distribution)/launch/gas_distributor.launch">
+    <arg name="use_unsteady_gas" value="false"/>
   </include>
 
 

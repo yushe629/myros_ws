@@ -1,6 +1,14 @@
 <launch>
 
+  <arg name="headless" default="true" />
+
+  <!-- AGV1 platform -->
   <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
+
+  <!-- Gas Sensor -->
+  <node pkg="rosserial_python" name="m5_atom_serial" type="serial_node.py">
+    <param name ="port"  value="/dev/m5_atom" />
+  </node>
 
   <!-- Map server -->
   <arg name="map_file_shorthand" default="map.yaml" />
@@ -49,7 +57,7 @@
     <rosparam file="$(find agv_explore)/param/navigation/move_base_params.yaml" command="load" />
   </node>
 
-  <!-- <!-\- rviz -\-> -->
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_demo)/rviz/navigation.rviz" /> -->
-  
+  <!-- rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_demo)/rviz/navigation.rviz" unless="$(arg headless)" />
+
 </launch>

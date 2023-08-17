@@ -15,7 +15,7 @@ class gas_roughly_search:
         
         rospy.init_node("gas_roughly_search")
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=10)
-        self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map",OccupancyGrid,  self.callback)
+        self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", OccupancyGrid, self.callback)
 
         # TODO: adjust params
         self.gas_visual_map = OccupancyGrid()
@@ -34,36 +34,37 @@ class gas_roughly_search:
         self.gas_visual_map.info.origin.orientation.w = 1
         self.gas_visual_map.data = [0] * self.gas_visual_map.info.width * self.gas_visual_map.info.height
 
-        
         self.execute = False
         self.completed = False
 
-        # publish and subscirbe topic 
+        # publish and subscirbe topic
         self.is_finish_patrol_sub = rospy.Subscriber("/is_finish_patrol", Bool, self.patrol_callback)
         self.is_finish_search_pub = rospy.Publisher("/is_finish_search", Bool, queue_size=1)
         self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.move_base_callback)
-        
-        
+
         rospy.spin()
 
     def move_base_callback(self, msg):
         if not self.execute:
             return
-        if msg.status.status == 3:
-            rospy.loginfo("%s", msg.status.text)
-            rospy.sleep(1.0)
-            new_msg = Bool()
-            new_msg.data = True
-            self.is_finish_search_pub.publish(new_msg)
-            self.execute = False
-        else:
-            rospy.loginfo("%s",msg.status.text)
+        rospy.loginfo("move base action status: %s", msg.status.text)
+        if msg.status.status == GalStatus.SUCCEEDED:
+
+            # wait 4 sec for more sensing
+            rospy.sleep(4.0)
+            self.is_moving = False
+            self.is_goal_published = False
+            if self.nth_point == len(self.relay_points):
+                msg = Bool()
+                msg.data = True
+                self.is_finish_search_pub.publish(msg)
+                self.execute = False
 
     def patrol_callback(self, msg):
         self.execute = msg.data
         if self.execute:
             rospy.loginfo("Searching")
-        
+
     def callback(self, msg):
         if not self.execute:
             return
@@ -88,7 +89,7 @@ class gas_roughly_search:
             self.goal_pub.publish(target)
             self.completed = True
         return
-        
+
 if __name__ == "__main__":
     try:
         gas_roughly_search_action = gas_roughly_search()

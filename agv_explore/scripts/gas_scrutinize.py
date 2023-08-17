@@ -9,7 +9,6 @@ from geometry_msgs.msg import Twist, PoseStamped, Pose
 from std_msgs.msg import Float32, Bool
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
-from nav_msgs.msg import OccupancyGrid
 
 # if scan_val is Inf, inf_distance is assigned.
 inf_distance = 5.0
@@ -37,13 +36,8 @@ class gas_scrutinize:
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
         self.rate = rospy.Rate(10.0)
-        
-        # self.odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
-        
-        self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
 
-        
-        # self.estimated_gas_map_sub = rospy.Subscriber("estimated_gas_map", self.map_callback)
+        self.is_finish_search_sub = rospy.Subscriber("/is_finish_search", Bool, self.search_callback)
 
         self.timeout_sec = rospy.get_param("~timeout_sec", 30.0)
 
@@ -70,11 +64,6 @@ class gas_scrutinize:
         self.max_gas_value_time = rospy.get_time()
         rospy.loginfo("execute: at %s", rospy.get_time())
 
-    # def odom_callback(self, msg):
-    #     if not self.execute:
-    #         return
-    #     self.robot_pose = msg.pose.pose
-
     def gas_callback(self,msg):
         if not self.execute:
             return
@@ -95,8 +84,7 @@ class gas_scrutinize:
                 self.final_robot_pose.orientation.w = transform.rotation.w
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
                 print(e)
-                self.rate.sleep()
-            
+
 
     def explore(self):
         if self.explore_state == 'front':
@@ -117,7 +105,7 @@ class gas_scrutinize:
             self.cmd_x = 0.0
             self.cmd_yaw = 0.0
             self.explore_state = 'front'
-            
+
     def callback(self, msg):
         if not self.execute:
             return
@@ -142,7 +130,7 @@ class gas_scrutinize:
             cmd_msg.linear.x = self.cmd_x
             cmd_msg.angular.z =self.cmd_yaw
             self.vel_pub.publish(cmd_msg)
-            
+
             self.goal_pose.header.seq = self.goal_pose.header.seq + 1
             self.goal_pose.header.stamp = rospy.Time.now()
             self.goal_pose.pose = self.final_robot_pose
@@ -152,9 +140,6 @@ class gas_scrutinize:
             self.execute = False
             return
 
-        #front_dist = msg.ranges[0]
-        # front_dists = msg.ranges[:20]+ msg.ranges[340:]
-        # front_dist = min(list(map(lambda x: inf_distance if x == float('inf') else x, front_dists)))
         size = len(msg.ranges)
         front_dists = msg.ranges[:half_of_scan_size]+ msg.ranges[(size - half_of_scan_size):]
         front_dist = min(list(map(lambda x: inf_distance if (x == float('inf') or x == 0.0
