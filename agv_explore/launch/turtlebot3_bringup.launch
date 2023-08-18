@@ -51,6 +51,9 @@
     <arg name="move_forward_only" value="$(arg move_forward_only)"/>
   </include>
 
+  <param name="/move_base/DWAPlannerROS/yaw_goal_tolerance" value="10.0" />
+  <param name="/move_base/DWAPlannerROS/xy_goal_tolerance" value="0.1" />
+
   <!-- gas distributor -->
   <include file="$(find gas_distribution)/launch/gas_distributor.launch">
     <arg name="use_unsteady_gas" value="false"/>
