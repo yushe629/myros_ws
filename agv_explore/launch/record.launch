@@ -2,8 +2,8 @@
 <launch>
     <arg name="bag_file_name" default="my_bag"/>
     <!-- Record bag -->
-    <node name="bag_record" pkg="rosbag" type="record"
-        args="record -O $(find agv_explore)/resources/bag/$(arg bag_file_name).bag
+    <node name="bag_record" pkg="rosbag" type="record" output="screen"
+        args="record -O $(find agv_explore)/$(arg bag_file_name).bag
 	      /gas
 	      /eco2
 	      /odom
