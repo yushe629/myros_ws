@@ -120,7 +120,7 @@ class gas_scrutinize:
             return
 
         last_sec = (rospy.get_time() - self.max_gas_value_time)
-        rospy.loginfo_throttle(1.0, "last_sec: %f", last_sec)
+        rospy.loginfo_throttle(1.0, "last_sec: %f, gas_value: %f", last_sec, self.gas_value)
         if last_sec  > self.timeout_sec:
             rospy.logwarn_once("Robot discovered goal!")
             self.explore_state = "explored"

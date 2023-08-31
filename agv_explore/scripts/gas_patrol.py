@@ -16,6 +16,7 @@ class gas_patrol:
         rospy.init_node("gas_patrol")
 
         self.relay_points = rospy.get_param("~relay_points")
+        print("waypoints: {} ".format(self.relay_points))
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
         self.finish_search = rospy.Publisher("/is_finish_search", Bool, queue_size = 1)
         self.task_start_sub = rospy.Subscriber("/start_task", Empty, self.task_start_callback)
@@ -86,17 +87,18 @@ class gas_patrol:
 
                 self.final_approach = True
 
-    def calc_plan(self, point):
+    def calc_plan(self, pose):
         self.goal.header.seq = self.goal.header.seq + 1
         self.goal.header.stamp = rospy.Time.now()
-        self.goal.pose.position.x = point[0]
-        self.goal.pose.position.y = point[1]
-        self.goal.pose.position.z = point[2]
-        q = quaternion_from_euler(0,0,point[3])
-        self.goal.pose.orientation.x = q[0]
-        self.goal.pose.orientation.y = q[1]
-        self.goal.pose.orientation.z = q[2]
-        self.goal.pose.orientation.w = q[3]
+        self.goal.pose.position.x = pose[0]
+        self.goal.pose.position.y = pose[1]
+        self.goal.pose.orientation.w = 1
+        if len(pose) == 3: # get yaw
+            q = quaternion_from_euler(0,0,pose[2])
+            self.goal.pose.orientation.x = q[0]
+            self.goal.pose.orientation.y = q[1]
+            self.goal.pose.orientation.z = q[2]
+            self.goal.pose.orientation.w = q[3]
 
     def patrol(self):
 
