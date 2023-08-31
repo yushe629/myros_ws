@@ -6,6 +6,7 @@
         args="record -O $(find agv_explore)/$(arg bag_file_name).bag
 	      /gas
 	      /eco2
+              /tvoc
 	      /odom
 	      /true_gas_map
 	      /estimated_gas_map
@@ -16,5 +17,7 @@
 	      /move_base
 	      /is_finish_patrol
 	      /is_finish_search
-	      /tf /tf_static"/>
+	      /tf
+              /tf_static
+              /rosout"/>
 </launch>
