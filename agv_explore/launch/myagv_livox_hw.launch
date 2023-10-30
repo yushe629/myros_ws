@@ -1,0 +1,29 @@
+<launch>
+
+  <!-- Robot Base Aibot Version 1 Description -->
+  <param name="robot_description" command="xacro $(find aibot_description)/urdf/chassis/$(env AIBOT_BASE)/chassis.urdf.xacro" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="100.0" />
+  </node>
+
+  <!-- Start ROS communication between the robot's computer and aibot base -->
+  <node pkg="rosserial_python" name="rosserial_aibot" type="serial_node.py" output="screen">
+    <param name="port" value="/dev/linobase" />
+    <param name="baud" value="57600" />
+  </node>
+
+  <!-- IMU Relay and Filter -->
+  <include file="$(find aibot_hw)/launch/include/imu/imu.launch" />
+
+  <!-- Publish aibot odometry -->
+  <node pkg="aibot_hw" name="aibot_hw_node" type="aibot_hw_node" />
+
+  <!-- WIP: publish static TF between livox frame "body" and "base_link" -->
+  <node pkg="tf" type="static_transform_publisher" name="livox_frame_broadcaster" args="-0.06 0 -0.2 0 0 0 1 body base_link 20" />
+
+
+  <!-- run livox in remote machine -->
+  <!-- <machine name="slam_machine" address="192.168.11.121" env-loader="$(find agv_explore)/env/slam_machine.sh" user="leus" /> -->
+
+  <!-- <include file="$(find livox_ros_driver2)/launch_ROS1/msg_MID360.launch" machine="slam_machine"/> -->
+</launch>

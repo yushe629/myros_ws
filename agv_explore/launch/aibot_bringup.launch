@@ -2,50 +2,53 @@
 
   <arg name="headless" default="true" />
 
-  <!-- AGV1 platform -->
-  <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
+  <arg name="livox_hw" default="false" />
 
-  <!-- Gas Sensor -->
-  <node pkg="rosserial_python" name="m5_atom_serial" type="serial_node.py">
-    <param name ="port"  value="/dev/m5_atom" />
-  </node>
+  <group if = "$(arg livox_hw)" >
+    <include file="$(find agv_explore)/launch/myagv_livox_hw.launch" />
+  </group>
+
+  <group unless = "$(arg livox_hw)" >
+    <!-- AGV1 platform -->
+    <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
+
+    <!-- amcl -->
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+      <param name="base_frame_id" value="base_link"/>
+      <param name="gui_publish_rate" value="10.0"/>
+      <param name="kld_err" value="0.05"/>
+      <param name="kld_z" value="0.99"/>
+      <param name="laser_lambda_short" value="0.1"/>
+      <param name="laser_likelihood_max_dist" value="2.0"/>
+      <param name="laser_max_beams" value="60"/>
+      <param name="laser_model_type" value="likelihood_field"/>
+      <param name="laser_sigma_hit" value="0.2"/>
+      <param name="laser_z_hit" value="0.5"/>
+      <param name="laser_z_short" value="0.05"/>
+      <param name="laser_z_max" value="0.05"/>
+      <param name="laser_z_rand" value="0.5"/>
+      <param name="max_particles" value="2000"/>
+      <param name="min_particles" value="500"/>
+      <param name="odom_alpha1" value="0.25"/>
+      <param name="odom_alpha2" value="0.25"/>
+      <param name="odom_alpha3" value="0.25"/>
+      <param name="odom_alpha4" value="0.25"/>
+      <param name="odom_alpha5" value="0.1"/>
+      <param name="odom_frame_id" value="odom"/>
+      <param name="odom_model_type" value="omni"/>
+      <param name="recovery_alpha_slow" value="0.001"/>
+      <param name="recovery_alpha_fast" value="0.1"/>
+      <param name="resample_interval" value="1"/>
+      <param name="transform_tolerance" value="1.25"/>
+      <param name="update_min_a" value="0.2"/>
+      <param name="update_min_d" value="0.2"/>
+    </node>
+  </group>
 
   <!-- Map server -->
   <arg name="map_file_shorthand" default="map.yaml" />
   <arg name="map_file" default="$(find gas_distribution)/maps/$(arg map_file_shorthand)"/>
   <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
-
-  <!-- amcl -->
-  <node pkg="amcl" type="amcl" name="amcl" output="screen">
-    <param name="base_frame_id" value="base_link"/>
-    <param name="gui_publish_rate" value="10.0"/>
-    <param name="kld_err" value="0.05"/>
-    <param name="kld_z" value="0.99"/>
-    <param name="laser_lambda_short" value="0.1"/>
-    <param name="laser_likelihood_max_dist" value="2.0"/>
-    <param name="laser_max_beams" value="60"/>
-    <param name="laser_model_type" value="likelihood_field"/>
-    <param name="laser_sigma_hit" value="0.2"/>
-    <param name="laser_z_hit" value="0.5"/>
-    <param name="laser_z_short" value="0.05"/>
-    <param name="laser_z_max" value="0.05"/>
-    <param name="laser_z_rand" value="0.5"/>
-    <param name="max_particles" value="2000"/>
-    <param name="min_particles" value="500"/>
-    <param name="odom_alpha1" value="0.25"/>
-    <param name="odom_alpha2" value="0.25"/>
-    <param name="odom_alpha3" value="0.25"/>
-    <param name="odom_alpha4" value="0.25"/>
-    <param name="odom_alpha5" value="0.1"/>
-    <param name="odom_frame_id" value="odom"/>
-    <param name="odom_model_type" value="omni"/>
-    <param name="recovery_alpha_slow" value="0.001"/>
-    <param name="recovery_alpha_fast" value="0.1"/>
-    <param name="resample_interval" value="1"/>
-    <param name="transform_tolerance" value="1.25"/>
-    <param name="update_min_a" value="0.2"/>
-    <param name="update_min_d" value="0.2"/>
-  </node>
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -56,6 +59,8 @@
     <rosparam file="$(find agv_explore)/param/navigation/base_local_planner_default_params.yaml" command="load" />
     <rosparam file="$(find agv_explore)/param/navigation/move_base_params.yaml" command="load" />
   </node>
+
+  <param name="/move_base/global_costmap/obstacle_layer/scan/topic" value="/livox/scan"/>
 
   <!-- rviz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_demo)/rviz/navigation.rviz" unless="$(arg headless)" />
