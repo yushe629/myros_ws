@@ -50,7 +50,8 @@ target_link_libraries (existing_path_global_planner_test existing_path_global_pl
 
 
 catkin_install_python(PROGRAMS
-  scripts/simple_explore.py
+  scripts/patrol_motion.py
+  scripts/patrol_state.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 
