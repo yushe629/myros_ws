@@ -1,4 +1,0 @@
-<launch>
-  <node pkg="rviz" type="rviz" name="navigation_rviz"
-        args="-d $(find agv_explore)/config/navigation.rviz"/>
-</launch>
