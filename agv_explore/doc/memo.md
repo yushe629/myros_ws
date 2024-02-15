@@ -51,3 +51,20 @@ $ rosrun map_server map_saver -f xxx-existing-path-map map:=/path_map
 ## Patrol Demo
 
 $ roslaunch agv_explore gas_patrol.launch plan_file_short_hand:=::.yaml # auto waypoint mission
+
+
+## New Smach based motion
+
+### Gazebo
+
+#### bringup turtblebot3
+
+$ export TURTLEBOT3_MODEL=waffle && roslaunch agv_explore turtlebot3_bringup.launch rviz:=true use_existing_path:=false
+
+#### bringup smach
+
+$ rosrun agv_explore patrol_motion.py _waypoint_info:=[[1.8,-0.5],[1.8,0.5]]
+
+#### start
+
+$ rostopic pub -1 /task_start std_msgs/Empty "{}"

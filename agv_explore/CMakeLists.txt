@@ -46,12 +46,3 @@ target_link_libraries(existing_path_global_planner ${catkin_LIBRARIES})
 
 add_executable(existing_path_global_planner_test src/existing_path_global_planner_test.cpp)
 target_link_libraries (existing_path_global_planner_test existing_path_global_planner ${catkin_LIBRARIES})
-
-
-
-catkin_install_python(PROGRAMS
-  scripts/patrol_motion.py
-  scripts/patrol_state.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
-

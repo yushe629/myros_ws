@@ -29,9 +29,9 @@ class Start(smach.State):
                            io_keys=['agv_init_position'])
 
         self.task_start = False
-        self.task_start_sub = rospy.Subscriber('~task_start', Empty, self.taskStartCallback)
+        self.task_start_sub = rospy.Subscriber('task_start', Empty, self.taskStartCallback)
         self.agv_frame = rospy.get_param("~agv/frame", "base_footprint")
-        self.map_frame = rospy.get_param("~map_frame", "/map")
+        self.map_frame = rospy.get_param("~map_frame", "map")
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
@@ -53,7 +53,7 @@ class Start(smach.State):
 
             try:
                 trans = self.tf_buffer.lookup_transform(self.map_frame, self.agv_frame, rospy.Time.now(), rospy.Duration(1.0))
-                trans = ros_np.numpify(trans)
+                trans = ros_np.numpify(trans.transform)
 
                 break
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
@@ -92,7 +92,7 @@ class AgvMotion(smach.State):
     def execute(self, userdata):
 
         # send the target position to AGV
-        waypoint = userdata.waypoint[userdata.cnt]
+        waypoint = userdata.waypoint_info[userdata.cnt]
 
         if not (len(waypoint) == 2 or len(waypoint) == 4):
             # invalid waypoint
@@ -107,6 +107,7 @@ class AgvMotion(smach.State):
         goal.pose.position.y = waypoint[1]
         goal.pose.orientation.w = 1
         self.goal_pub.publish(goal)
+        self.reach = None
 
         # check the convergence
 
@@ -118,15 +119,19 @@ class AgvMotion(smach.State):
 
                     if len(waypoint) == 2:
                         # only position
+                        self.reach = None
                         return 'idle'
                     else:
                         # flight
+                        self.reach = None
                         return 'flight'
                 else:
+                    self.reach = None
                     return 'failed'
 
                 break
 
+            rospy.loginfo_throttle(1.0, "[AGV] move to waypoint{}: [{}, {}]".format(userdata.cnt + 1, waypoint[0], waypoint[1]))
             rospy.sleep(0.1)
 
 
@@ -145,7 +150,7 @@ class Idle(smach.State):
 
        userdata.cnt += 1
 
-       if userdata.cnt == len(userdata.waypoint):
+       if userdata.cnt == len(userdata.waypoint_info):
            return 'finish'
        else:
            return 'continue'
@@ -154,7 +159,7 @@ class Finish(smach.State):
     def __init__(self):
 
         smach.State.__init__(self,
-                             outcomes=['preempted'], io_keys=['agv_init_position'])
+                             outcomes=['preempted'], io_keys=['agv_init_position', 'cnt'])
 
         self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
 
@@ -201,7 +206,7 @@ class UavTakeoff(smach.State):
     def odomCallback(self, msg):
         self.pos = msg.pose.pose.position
         q = msg.pose.pose.orientation
-        euler = tft.euler_from_quaternion(q.x, q.y, q.z, q.w)
+        euler = tft.euler_from_quaternion([q.x, q.y, q.z, q.w])
         self.yaw = euler[2]
 
 
@@ -212,7 +217,7 @@ class UavTakeoff(smach.State):
     def execute(self, userdata):
 
         # get waypoint
-        waypoint = userdata.waypoint[userdata.cnt]
+        waypoint = userdata.waypoint_info[userdata.cnt]
 
         # set the uav initial position
         userdata.after_sensing_target_pose = [self.pos.x, self.pos.y, self.pos.z + self.land_height_offset, self.yaw]

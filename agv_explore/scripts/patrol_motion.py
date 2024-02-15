@@ -7,11 +7,12 @@ import ros_numpy
 import copy
 from patrol_state import *
 
+
 def main():
     rospy.init_node('patrol_motion')
     sm_top = smach.StateMachine(outcomes=['preempted'])
 
-    sm_top.userdata.waypoint_info = rospy.get_param('~waypoint_count', [])
+    sm_top.userdata.waypoint_info = rospy.get_param('~waypoint_info', [])
     sm_top.userdata.cnt = 0
 
     sm_top.userdata.agv_init_position = None
@@ -96,7 +97,8 @@ def main():
 
         smach.StateMachine.add('Finish', Finish(),
                                transitions={},
-                               remapping={'agv_init_position': 'agv_init_position'})
+                               remapping={'agv_init_position': 'agv_init_position',
+                                          'cnt': 'cnt'})
 
 
         sis = smach_ros.IntrospectionServer('patrol_smach_server', sm_top, '/SM_ROOT')
