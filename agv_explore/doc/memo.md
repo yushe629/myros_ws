@@ -63,6 +63,9 @@ $ export TURTLEBOT3_MODEL=waffle && roslaunch agv_explore turtlebot3_bringup.lau
 
 #### bringup smach
 
+$ roslaunch agv_explore patrol.launch waypoint_file:=turtlebot3_gazebo_wp.yaml
+
+or following rosrun commnd
 $ rosrun agv_explore patrol_motion.py _waypoint_info:=[[1.8,-0.5],[1.8,0.5]]
 
 #### start
