@@ -3,7 +3,7 @@
   <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
   <arg name="path_file" default="$(find agv_explore)/map/turtlebot3/turtlebot3_gazebo_world_existing_path.yaml"/>
   <arg name="use_existing_path" default="false"/>
-  <arg name="initial_pose_x" default="-1.8"/>
+  <arg name="initial_pose_x" default="-2.0"/>
   <arg name="initial_pose_y" default="-0.5"/>
   <arg name="initial_pose_a" default="0.0"/>
   <arg name="move_forward_only" default="false"/>
