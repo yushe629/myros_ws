@@ -16,6 +16,7 @@ from move_base_msgs.msg import MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatus
 from aerial_robot_msgs.msg import PoseControlPid
 from nav_msgs.msg import Odometry
+from move_base_msgs.msg import MoveBaseActionGoal
 
 from sensor_msgs.msg import Image 
 from cv_bridge import CvBridge
@@ -74,7 +75,7 @@ class AgvMotion(smach.State):
                            outcomes=['flight', 'idle', 'failed'],
                            io_keys=['waypoint_info', 'cnt'])
 
-        self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
+        self.goal_pub = rospy.Publisher("/move_base/goal", MoveBaseActionGoal, queue_size = 1)
         self.move_base_result_sub = rospy.Subscriber("/move_base/result", MoveBaseActionResult, self.waypointCallback)
 
         self.reach = None
@@ -106,7 +107,10 @@ class AgvMotion(smach.State):
         goal.pose.position.x = waypoint[0]
         goal.pose.position.y = waypoint[1]
         goal.pose.orientation.w = 1
-        self.goal_pub.publish(goal)
+        action_goal = MoveBaseActionGoal()
+        action_goal.header = goal.header
+        action_goal.goal.target_pose = goal
+        self.goal_pub.publish(action_goal)
         self.reach = None
 
         # check the convergence
@@ -185,16 +189,16 @@ class UavTakeoff(smach.State):
                            outcomes=['succeeded', 'failed'],
                            io_keys=['waypoint_info', 'cnt', 'before_sensing_target_pose', 'after_sensing_target_pose'])
 
-        self.arm_pub = rospy.Publisher("start", Empty, queue_size = 1)
-        self.takeoff_pub = rospy.Publisher("takeoff", Empty, queue_size = 1)
-        self.state_sub = rospy.Subscriber("flight_state", UInt8, self.stateCallback)
-        self.odom_sub = rospy.Subscriber("odom", Odometry, self.odomCallback)
+        self.arm_pub = rospy.Publisher("uav/start", Empty, queue_size = 1)
+        self.takeoff_pub = rospy.Publisher("uav/takeoff", Empty, queue_size = 1)
+        self.state_sub = rospy.Subscriber("uav/flight_state", UInt8, self.stateCallback)
+        self.odom_sub = rospy.Subscriber("uav/odom", Odometry, self.odomCallback)
 
         self.land_height_offset = rospy.get_param('~uav/land_height_offset', 0.3)
         self.timeout = rospy.get_param('~uav/takeoff_timeout', 30.0)
 
-        self.map_frame = rospy.get_param('~map_frame', '/map')
-        self.uav_world_frame = rospy.get_param('~uav/world_frame', '/world')
+        self.map_frame = rospy.get_param('~map_frame', 'map')
+        self.uav_world_frame = rospy.get_param('~uav/world_frame', 'world')
 
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
@@ -226,8 +230,8 @@ class UavTakeoff(smach.State):
         while not rospy.is_shutdown():
 
             try:
-                trans = self.tf_buffer.lookup_transform(self.map_frame, self.uav_frame, rospy.Time.now(), rospy.Duration(1.0))
-                trans = ros_np.numpify(trans)
+                trans = self.tf_buffer.lookup_transform(self.map_frame, self.uav_world_frame, rospy.Time.now(), rospy.Duration(1.0))
+                trans = ros_np.numpify(trans.transform)
                 break
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 continue
@@ -251,12 +255,13 @@ class UavTakeoff(smach.State):
                 target_pose_map = tft.concatenate_matrices(tft.translation_matrix(waypoint[0:3]), tft.euler_matrix(0,0,waypoint[3]))
                 target_pose_uav = tft.concatenate_matrices(tft.inverse_matrix(trans), target_pose_map)
 
-                userdata.before_sensing_target_pose = userdata.after_sensing_target_pose
+                userdata.before_sensing_target_pose = copy.deepcopy(userdata.after_sensing_target_pose)
                 userdata.before_sensing_target_pose[2] = tft.translation_from_matrix(target_pose_uav)[2] # z
                 userdata.after_sensing_target_pose[3] = tft.euler_from_matrix(target_pose_uav)[2] # yaw
 
                 return 'succeeded'
 
+            rospy.loginfo_throttle(1.0, "[UAV] takeoff")
             rospy.sleep(0.1)
 
         rospy.logerr("[Timeout] UAV cannot hover after takeoff")
@@ -268,21 +273,23 @@ class UavWayPoint(smach.State):
 
         smach.State.__init__(self,
                            outcomes=['succeeded', 'failed'],
-                           io_keys=['uav_target_pose'])
+                           io_keys=['target_pose'])
 
         self.timeout = rospy.get_param('~uav/hover_timeout', 30.0)
-        self.nav_pub = rospy.Publisher("~uav/nav", PoseStamped, queue_size = 1)
-        self.control_sub = rospy.Subscriber('~control_term', PoseControlPid, self.controlCallback)
+        self.nav_pub = rospy.Publisher("uav/nav", PoseStamped, queue_size = 1)
+        self.odom_sub = rospy.Subscriber("uav/odom", Odometry, self.odomCallback)
         self.pos_converge_thresh = rospy.get_param('~uav/hover_pos_converge_tresh', 0.05)
         self.rot_converge_thresh = rospy.get_param('~uav/hover_rot_converge_tresh', 0.10)
-        self.target_pos = None
-        self.pos_error = None
-        self.rot_error = None
+        self.pos = None
+        self.yaw = None
 
-    def controlCallback(self, msg):
-        self.target_pos = [msg.x.target_p, msg.y.target_p, msg.z.target_p]
-        self.pos_error = [msg.x.err_p, msg.y.err_p, msg.z.err_p]
-        self.rot_error = [msg.roll.err_p, msg.pitch.err_p, msg.yaw.err_p]
+
+    def odomCallback(self, msg):
+        self.pos = msg.pose.pose.position
+        q = msg.pose.pose.orientation
+        euler = tft.euler_from_quaternion([q.x, q.y, q.z, q.w])
+        self.yaw = euler[2]
+
 
     def execute(self, userdata):
 
@@ -290,11 +297,11 @@ class UavWayPoint(smach.State):
         waypoint = userdata.target_pose
         msg = PoseStamped()
         # only use z and yaw
-        msg.pose.position.x = self.target_pos[0]
-        msg.pose.position.y = self.target_pos[1]
+        msg.pose.position.x = waypoint[0]
+        msg.pose.position.y = waypoint[1]
         msg.pose.position.z = waypoint[2]
         q = tft.quaternion_from_matrix(tft.euler_matrix(0, 0, waypoint[3]))
-        msg.pose.orientation = Quaternion(q)
+        msg.pose.orientation = Quaternion(*q)
         self.nav_pub.publish(msg)
 
         rospy.sleep(0.5)
@@ -304,10 +311,15 @@ class UavWayPoint(smach.State):
 
         while rospy.get_time() - t < self.timeout:
 
-            # only pos z and yaw
-            if np.abs(self.pos_error[2]) < self.pos_converge_thresh and \
-               np.abs(self.rot_error[2]) < self.rot_converge_thresh: 
+            # check convergence (only pos z and yaw)
+            z_err = waypoint[2] - self.pos.z
+            yaw_err = waypoint[3] - self.yaw
+            if np.abs(z_err) < self.pos_converge_thresh and \
+               np.abs(yaw_err) < self.rot_converge_thresh:
                 return 'succeeded'
+
+            rospy.loginfo_throttle(1.0, "[UAV] go to the waypoint: {}, pos z error: {}, yaw error: {}".format(waypoint, z_err, yaw_err))
+            rospy.sleep(0.1)
 
 
         rospy.logwarn("[UAV] hovering cannot converge")
@@ -327,8 +339,8 @@ class UavSensing(smach.State):
         # caputre and save image
         try:
             img_msg = rospy.wait_for_message("/camera/image_raw", Image, timeout = 2.0)
-        except ROSException:
-            rospy.logerror("Cannot get the camera image data from topic of ...")
+        except:
+            rospy.logerr("Cannot get the camera image data from topic of ...")
             return 'failed'
 
         rospy.loginfo("Get the camera image data")
@@ -347,8 +359,8 @@ class UavLand(smach.State):
                            io_keys=[])
 
 
-        self.land_pub = rospy.Publisher("land", Empty, queue_size = 1)
-        self.state_sub = rospy.Subscriber("flight_state", UInt8, self.stateCallback)
+        self.land_pub = rospy.Publisher("uav/land", Empty, queue_size = 1)
+        self.state_sub = rospy.Subscriber("uav/flight_state", UInt8, self.stateCallback)
 
         self.timeout = rospy.get_param('~uav/land_timeout', 30.0)
         self.flight_state = None
@@ -371,6 +383,7 @@ class UavLand(smach.State):
             if self.flight_state == 0: # stop
                 return 'succeeded'
 
+            rospy.loginfo_throttle(1.0, "[UAV] landing")
             rospy.sleep(0.1)
 
 
