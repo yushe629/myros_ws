@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="waypoint_file" default="simple_waypoints.yaml" />
+
+  <node pkg="agv_explore" type="patrol_motion.py" name="patrol_state_machine" output="screen">
+    <rosparam file="$(find agv_explore)/param/patrol/$(arg waypoint_file)" command="load" />
+    <remap from="uav/start" to="/quadrotor/teleop_command/start"/>
+    <remap from="uav/takeoff" to="/quadrotor/teleop_command/takeoff"/>
+    <remap from="uav/land" to="/quadrotor/teleop_command/land"/>
+    <remap from="uav/nav" to="/quadrotor/target_pose"/>
+    <remap from="uav/odom" to="/quadrotor/uav/cog/odom"/>
+    <remap from="uav/flight_state" to="/quadrotor/flight_state"/>
+    <remap from="uav/control_term" to="/quadrotor/debug/pose/pid"/>
+  </node>
+</launch>
