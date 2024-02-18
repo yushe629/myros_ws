@@ -3,11 +3,14 @@
   <arg name="headless" default="true" />
 
   <arg name="livox_hw" default="false" />
+  <arg name="with_uav" default="false" />
 
   <arg name="existing_path" default="false" />
 
   <group if = "$(arg livox_hw)" >
-    <include file="$(find agv_explore)/launch/myagv_livox_hw.launch" />
+    <include file="$(find agv_explore)/launch/myagv_livox_hw.launch" >
+      <arg name="with_uav" value="$(arg with_uav)" />
+    </include>
   </group>
 
   <group unless = "$(arg livox_hw)" >
@@ -48,8 +51,7 @@
   </group>
 
   <!-- Map server -->
-  <arg name="map_file_shorthand" default="map.yaml" />
-  <arg name="map_file" default="$(find gas_distribution)/maps/$(arg map_file_shorthand)"/>
+  <arg name="map_file" default="$(find agv_explore)/map/8_326/map-8-326.yaml"/>
   <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
 
   <!-- move_base -->

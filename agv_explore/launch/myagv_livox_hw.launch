@@ -1,5 +1,12 @@
 <launch>
 
+  <arg name="with_uav" default="false"/>
+  <arg name="base_x" value="0.06" if="$(arg with_uav)" />
+  <arg name="base_z" value="-0.31" if="$(arg with_uav)" />
+  <arg name="base_x" value="-0.06" unless="$(arg with_uav)" />
+  <arg name="base_z" value="-0.2" unless="$(arg with_uav)" />
+
+
   <!-- Robot Base Aibot Version 1 Description -->
   <param name="robot_description" command="xacro $(find aibot_description)/urdf/chassis/$(env AIBOT_BASE)/chassis.urdf.xacro" />
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
@@ -19,7 +26,7 @@
   <node pkg="aibot_hw" name="aibot_hw_node" type="aibot_hw_node" />
 
   <!-- WIP: publish static TF between livox frame "body" and "base_link" -->
-  <node pkg="tf" type="static_transform_publisher" name="livox_frame_broadcaster" args="-0.06 0 -0.2 0 0 0 1 body base_link 20" />
+  <node pkg="tf" type="static_transform_publisher" name="livox_frame_broadcaster" args="$(arg base_x) 0 $(arg base_z) 0 0 0 1 body base_link 20" />
 
 
   <!-- run livox in remote machine -->
