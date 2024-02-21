@@ -26,6 +26,7 @@ class UavWireMotion:
 
         self.flight_state = None
 
+        self.debug = rospy.get_param("~debug", False)
         self.wire_bias = rospy.get_param("~wire_bias", 0.02)
         self.normal_torque = rospy.get_param("~normal_torque", 20)
         self.wind_torque = rospy.get_param("~wind_torque", 5)
@@ -77,6 +78,10 @@ class UavWireMotion:
 
 
         self.flight_state = msg.data
+
+        if self.flight_state == 1 or self.flight_state == 2:
+            self.uav_init_pos = self.uav_pos
+
 
     def odom_callback(self, msg):
 
@@ -172,7 +177,15 @@ class UavWireMotion:
             return
 
         # straight distance from takeoff
-        d = np.linalg.norm(self.uav_pos - self.uav_init_pos) + self.wire_bias
+        try:
+            d = np.linalg.norm(self.uav_pos - self.uav_init_pos) + self.wire_bias
+        except:
+            print(self.uav_pos, self.uav_init_pos)
+            raise
+
+        if not (self.flight_state == 3 or self.flight_state == 4 or self.flight_state == 5):
+            if not self.debug:
+                return
 
         # simple model
         ang = self.wire_scale * d + self.servo_init_angle
