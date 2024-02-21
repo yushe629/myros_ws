@@ -14,7 +14,6 @@ from std_msgs.msg import Empty, UInt8
 from geometry_msgs.msg import PoseStamped, Quaternion
 from move_base_msgs.msg import MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatus
-from aerial_robot_msgs.msg import PoseControlPid
 from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseActionGoal
 
@@ -165,7 +164,7 @@ class Finish(smach.State):
         smach.State.__init__(self,
                              outcomes=['preempted'], io_keys=['agv_init_position', 'cnt'])
 
-        self.goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size = 1)
+        self.goal_pub = rospy.Publisher("/move_base/goal", MoveBaseActionGoal, queue_size = 1)
 
     def execute(self, userdata):
 
@@ -176,7 +175,10 @@ class Finish(smach.State):
         goal.pose.position.x = userdata.agv_init_position[0]
         goal.pose.position.y = userdata.agv_init_position[1]
         goal.pose.orientation.w = 1
-        self.goal_pub.publish(goal)
+        action_goal = MoveBaseActionGoal()
+        action_goal.header = goal.header
+        action_goal.goal.target_pose = goal
+        self.goal_pub.publish(action_goal)
 
         return 'preempted'
 
