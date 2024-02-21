@@ -28,6 +28,13 @@
   <!-- WIP: publish static TF between livox frame "body" and "base_link" -->
   <node pkg="tf" type="static_transform_publisher" name="livox_frame_broadcaster" args="$(arg base_x) 0 $(arg base_z) 0 0 0 1 body base_link 20" />
 
+  <!-- uav wire device-->
+  <include file="$(find agv_explore)/launch/uav_wire_motion.launch" if="$(arg with_uav)" >
+    <arg name="wire_bias" value="0.04" /> <!-- for vio mode -->
+    <arg name="strong_wind_torque" value="150" />
+  </include>
+
+
 
   <!-- run livox in remote machine -->
   <!-- <machine name="slam_machine" address="192.168.11.121" env-loader="$(find agv_explore)/env/slam_machine.sh" user="leus" /> -->

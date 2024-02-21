@@ -2,11 +2,14 @@
 <launch>
 
   <arg name="wire_bias" default="0.01" />
-  <arg name="strong_wind_torque" default="50" />
+  <arg name="strong_wind_torque" default="150" />
+  <arg name="usb_port" default="/dev/dynamixel" />
+  <arg name="debug" default="false" />
 
   <!-- dynamixel controller -->
   <include file="$(find dynamixel_workbench_controllers)/launch/dynamixel_controllers.launch">
     <arg name="use_moveit" value="true" />
+    <arg name="usb_port" value="$(arg usb_port)" />
   </include>
 
   <param name="dynamixel_info" value="$(find agv_explore)/config/dynamixel_config.yaml"/>
@@ -17,5 +20,6 @@
     <remap from="flight_state" to="quadrotor/flight_state"/>
     <param name="wire_bias" value="$(arg wire_bias)" />
     <param name="strong_wind_torque" value="$(arg strong_wind_torque)" />
+    <param name="debug" value="$(arg debug)" />
   </node>
 </launch>
