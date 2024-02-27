@@ -225,8 +225,6 @@ class UavTakeoff(smach.State):
         # get waypoint
         waypoint = userdata.waypoint_info[userdata.cnt]
 
-        # set the uav initial position
-        userdata.after_sensing_target_pose = [self.pos.x, self.pos.y, self.pos.z + self.land_height_offset, self.yaw]
 
         # get offset from /map to /world (/camera_init of fast_lio)
         while not rospy.is_shutdown():
@@ -242,6 +240,10 @@ class UavTakeoff(smach.State):
         # motor arm
         self.arm_pub.publish(Empty())
         rospy.sleep(2.0) # TODO, check the duration
+
+        # set the uav initial position
+        userdata.after_sensing_target_pose = [self.pos.x, self.pos.y, self.pos.z + self.land_height_offset, self.yaw]
+
         self.takeoff_pub.publish(Empty())
 
         # takeoff
@@ -259,7 +261,7 @@ class UavTakeoff(smach.State):
 
                 userdata.before_sensing_target_pose = copy.deepcopy(userdata.after_sensing_target_pose)
                 userdata.before_sensing_target_pose[2] = tft.translation_from_matrix(target_pose_uav)[2] # z
-                userdata.after_sensing_target_pose[3] = tft.euler_from_matrix(target_pose_uav)[2] # yaw
+                userdata.before_sensing_target_pose[3] = tft.euler_from_matrix(target_pose_uav)[2] # yaw
 
                 return 'succeeded'
 
