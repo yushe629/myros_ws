@@ -12,22 +12,15 @@
   -- aibot_hw: https://github.com/xmhuaway/aibot_description master
   -- aibot_description: https://github.com/xmhuaway/aibot_description master
 
-
 ### @ myagv (set uav as master )
+
 $ roslaunch agv_explore aibot_bringup.launch livox_hw:=true with_uav:=true
-
-### @ local
-$ roslaunch agv_explore rviz_display.launch
+$ roslaunch agv_explore patrol.launch waypoint_file:=::.yaml ## Patrol 
 
 
-## [Additional] Generate Existing Path Mapg
+### [Additional] Generate Existing Path Map
 
-### @ myagv
 $ rosrun agv_explore existing_path_generator
 $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # keyboard
 $ rosrun map_server map_saver -f xxx-existing-path-map map:=/path_map
 
-## Patrol 
-
-$ roslaunch agv_explore patrol.launch waypoint_file:=::.yaml
-$ rostopic pub -1 /task_start std_msgs/Empty "{}"
