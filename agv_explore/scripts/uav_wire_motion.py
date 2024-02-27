@@ -85,8 +85,8 @@ class UavWireMotion:
 
     def odom_callback(self, msg):
 
-        self.uav_pos = msg.pose.pose.position
-        self.uav_pos = np.array([self.uav_pos.x, self.uav_pos.y, self.uav_pos.z])
+        pos = msg.pose.pose.position
+        self.uav_pos = np.array([pos.x, pos.y, pos.z])
 
         if self.uav_init_pos is None:
             self.uav_init_pos = self.uav_pos
