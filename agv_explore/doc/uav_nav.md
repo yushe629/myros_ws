@@ -15,7 +15,7 @@ $ roslaunch fast_lio_localization localization_mid360.launch map:=`rospack find 
 
 - step1: Bringup
 
-$ roslaunch mini_quadrotor bringup.launch
+$ roslaunch agv_explore uav_bringup.launch
 
 - step2: Fast lio localization
 
