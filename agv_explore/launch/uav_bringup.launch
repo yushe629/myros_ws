@@ -27,7 +27,7 @@
     <arg name="direct_model_name" value="$(find agv_explore)/urdf/quadrotor.urdf.xacro" />
   </include>
 
-  <param name="/quadrotor/navigation/takeoff_height" value="0.8"/>
+  <param name="/quadrotor/navigation/takeoff_height" value="0.7"/>
   <param name="/quadrotor/bat_info/low_voltage_thre" value="2"/>
   <param name="/quadrotor/navigation/land_descend_vel" value="-0.1"/>
 
