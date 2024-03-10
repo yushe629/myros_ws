@@ -30,7 +30,7 @@
 
   <!-- uav wire device-->
   <include file="$(find agv_explore)/launch/uav_wire_motion.launch" if="$(arg with_uav)" >
-    <arg name="wire_bias" value="0.04" /> <!-- for vio mode -->
+    <arg name="wire_bias" value="0.05" /> <!-- for vio mode -->
     <arg name="strong_wind_torque" value="150" />
   </include>
 
