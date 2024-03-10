@@ -342,17 +342,19 @@ class UavSensing(smach.State):
 
         # caputre and save image
         try:
-            img_msg = rospy.wait_for_message("/camera/image_raw", Image, timeout = 2.0)
+            img_msg = rospy.wait_for_message("/camera/image_raw", Image, timeout = 5.0)
+
         except:
             rospy.logerr("Cannot get the camera image data from topic of ...")
             return 'failed'
 
+
         rospy.loginfo("Get the camera image data")
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(img_msg, "bgr8")
-        cv2.imwrite('waypoint' + str(cnt+1) + '.jpeg', img)
+        cv2.imwrite('waypoint' + str(userdata.cnt+1) + '.jpeg', img)
 
-        return 'succedded'
+        return 'succeeded'
 
 
 class UavLand(smach.State):
