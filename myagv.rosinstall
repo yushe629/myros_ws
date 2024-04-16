@@ -10,10 +10,10 @@
 
 - git:
     local-name: aibot_sim
-    uri: https://github.com/xmhuaway/aibot_sim.git
-    version: master
+    uri: https://github.com/tongtybj/aibot_sim.git
+    version: develop/myagv
 
 - git:
     local-name: aibot_description
-    uri: https://github.com/xmhuaway/aibot_description.git
-    version: master
+    uri: https://github.com/tongtybj/aibot_description.git
+    version: develop/myagv
