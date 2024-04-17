@@ -36,3 +36,9 @@ In another terminal:
 rosrun agv_explore simple_explore.py
 ```
 
+
+### Gazebo
+
+```bash
+ roslaunch agv_explore aibot_bringup.launch simulation:=true map_file:=/home/chou/ros/agv_ws/src/gas_sensing/agv_explore/map/turtlebot3/turtlebot3_gazebo_world_map.yaml
+```
