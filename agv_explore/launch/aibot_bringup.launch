@@ -10,7 +10,11 @@
 
 
   <group if ="$(arg simulation)">
-    <include file="$(find aibot_sim)/launch/gazebo.launch" />
+    <include file="$(find aibot_sim)/launch/gazebo.launch">
+      <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
+      <arg name="spawn_x" value="-2.0"/>
+      <arg name="spawn_y" value="-1.0"/>
+    </include>
     <node pkg="fake_localization" name="fake_localization"  type="fake_localization" >
       <remap from="base_pose_ground_truth" to="/odom" />
     </node>
