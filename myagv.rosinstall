@@ -1,0 +1,20 @@
+- git:
+    local-name: aibot_hw
+    uri: https://github.com/xmhuaway/aibot_hw.git
+    version: master
+
+- git:
+    local-name: aibot_msgs
+    uri: https://github.com/xmhuaway/aibot_msgs.git
+    version: master
+
+- git:
+    local-name: aibot_description
+    uri: https://github.com/tongtybj/aibot_description.git
+    version: develop/myagv
+
+# uav wire device
+- git:
+    local-name: dyamixel-workbench
+    uri: https://github.com/tongtybj/dynamixel-workbench.git 
+    viersion: develop/current_based_position_control

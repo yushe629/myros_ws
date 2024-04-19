@@ -1,0 +1,111 @@
+<launch>
+
+  <arg name="headless" default="true" />
+
+  <arg name="livox_hw" default="false" />
+  <arg name="with_uav" default="false" />
+
+  <arg name="existing_path" default="false" />
+
+  <arg name="simulation" default="false" />
+  <arg name="world_name" default="worlds/empty.world" />
+  <arg name="spawn_x" default="-1.8"/>
+  <arg name="spawn_y" default="-1.0"/>
+
+  <group if ="$(arg simulation)">
+
+    <param name="robot_description" command="xacro $(find cooperative_patrol)/urdf/myagv.urdf.xacro" />
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+      <arg name="world_name" value="$(arg world_name)" />
+    </include>
+
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_agv_model" args="-urdf -model car -x $(arg spawn_x) -y $(arg spawn_y) -param robot_description " />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="100.0" />
+    </node>
+
+    <node pkg="fake_localization" name="fake_localization"  type="fake_localization" >
+      <remap from="base_pose_ground_truth" to="/odom" />
+    </node>
+  </group>
+
+  <group unless ="$(arg simulation)">
+    <group if = "$(arg livox_hw)" >
+      <include file="$(find cooperative_patrol)/launch/myagv_livox_hw.launch" >
+        <arg name="with_uav" value="$(arg with_uav)" />
+      </include>
+    </group>
+
+    <group unless = "$(arg livox_hw)" >
+      <!-- AGV1 platform -->
+      <include file="$(find aibot_hw)/launch/chassis_hw.launch" />
+
+      <!-- amcl -->
+      <node pkg="amcl" type="amcl" name="amcl" output="screen">
+        <param name="base_frame_id" value="base_link"/>
+        <param name="gui_publish_rate" value="10.0"/>
+        <param name="kld_err" value="0.05"/>
+        <param name="kld_z" value="0.99"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+        <param name="laser_max_beams" value="60"/>
+        <param name="laser_model_type" value="likelihood_field"/>
+        <param name="laser_sigma_hit" value="0.2"/>
+        <param name="laser_z_hit" value="0.5"/>
+        <param name="laser_z_short" value="0.05"/>
+        <param name="laser_z_max" value="0.05"/>
+        <param name="laser_z_rand" value="0.5"/>
+        <param name="max_particles" value="2000"/>
+        <param name="min_particles" value="500"/>
+        <param name="odom_alpha1" value="0.25"/>
+        <param name="odom_alpha2" value="0.25"/>
+        <param name="odom_alpha3" value="0.25"/>
+        <param name="odom_alpha4" value="0.25"/>
+        <param name="odom_alpha5" value="0.1"/>
+        <param name="odom_frame_id" value="odom"/>
+        <param name="odom_model_type" value="omni"/>
+        <param name="recovery_alpha_slow" value="0.001"/>
+        <param name="recovery_alpha_fast" value="0.1"/>
+        <param name="resample_interval" value="1"/>
+        <param name="transform_tolerance" value="1.25"/>
+        <param name="update_min_a" value="0.2"/>
+        <param name="update_min_d" value="0.2"/>
+      </node>
+    </group>
+  </group>
+
+  <!-- Map server -->
+  <arg name="map_file" default="$(find cooperative_patrol)/map/8_326/map-8-326.yaml"/>
+  <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find cooperative_patrol)/param/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/base_local_planner_default_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/move_base_params.yaml" command="load" />
+  </node>
+  <param name="/move_base/global_costmap/obstacle_layer/scan/topic" value="/livox/scan" if = "$(arg livox_hw)" />
+  <param name="/move_base/global_costmap/obstacle_layer/scan/min_obstacle_height" value="-0.1" if = "$(arg livox_hw)" />
+  <param name="/move_base/local_costmap/obstacle_layer/scan/topic" value="/livox/scan" if = "$(arg livox_hw)" />
+  <param name="/move_base/local_costmap/obstacle_layer/scan/min_obstacle_height" value="-0.1" if = "$(arg livox_hw)" />
+
+  <group if="$(arg existing_path)">
+    <param name="/move_base/base_global_planner" value="navfn/ExistingPathGlobalPlanner" />
+
+    <!-- Map server for existing path -->
+    <arg name="path_file" default="" />
+    <node pkg="map_server" name="map_server_for_existing_path" type="map_server" args="$(arg path_file)" launch-prefix="bash -c 'sleep 3; $0 $@' ">
+      <remap from = "/map" to = "/path_map" />
+    </node>
+  </group>
+
+
+  <!-- rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find navigation_demo)/rviz/navigation.rviz" unless="$(arg headless)" />
+
+</launch>

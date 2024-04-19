@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="rm" default="True" />
+  <arg name="sim" default="False" />
+  <arg name="estimate_mode"  default= "0" />
+
+  <arg name="launch_gazebo" default="True" />
+  <arg name="spawn_x" default="0.0"/>
+  <arg name="spawn_y" default="0.0"/>
+  <arg name="spawn_z" default="0.0"/>
+  <arg name="spawn_yaw" default="0.0"/>
+
+  <arg name="headless" default="True" />
+
+  <include file="$(find mini_quadrotor)/launch/bringup.launch" >
+    <arg name="rm" value="$(arg rm)" />
+    <arg name="sim" value="$(arg sim)" />
+    <arg name="estimate_mode" value="$(arg estimate_mode)" />
+
+    <arg name="launch_gazebo" value="$(arg launch_gazebo)" />
+    <arg name="spawn_x" value="$(arg spawn_x)" />
+    <arg name="spawn_y" value="$(arg spawn_y)" />
+    <arg name="spawn_z" value="$(arg spawn_z)" />
+    <arg name="spawn_yaw" value="$(arg spawn_yaw)" />
+    <arg name="headless" value="$(arg headless)" />
+    <arg name="direct_model" value="True" />
+    <arg name="direct_model_name" value="$(find cooperative_patrol)/urdf/quadrotor.urdf.xacro" />
+  </include>
+
+  <param name="/quadrotor/navigation/takeoff_height" value="0.7"/>
+  <param name="/quadrotor/bat_info/low_voltage_thre" value="2"/>
+  <param name="/quadrotor/navigation/land_descend_vel" value="-0.1"/>
+
+  <node name="camera" pkg="usb_cam" type="usb_cam_node" output="screen" unless="$(arg sim)" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="1280" />
+    <param name="image_height" value="720" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="color_format" value="yuv422p" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node>
+
+
+</launch>

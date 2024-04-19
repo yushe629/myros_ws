@@ -1,2 +1,0 @@
-std_msgs/Float32 gas_concentration
-sensor_msgs/LaserScan scan
