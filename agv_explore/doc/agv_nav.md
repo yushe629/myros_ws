@@ -1,17 +1,5 @@
 ## Localization & Navigation
 
-### repository:
-
-#### Base: 
-- dyamixel-workbench:  git@github.com:tongtybj/dynamixel-workbench.git develop/current_based_position_control
-- gas_sensing: git@github.com:tongtybj/gas_sensing.git develop/refactor
-
-#### AGV
-
-- aibot:
-  -- aibot_hw: https://github.com/xmhuaway/aibot_description master
-  -- aibot_description: https://github.com/xmhuaway/aibot_description master
-
 ### @ myagv (set uav as master )
 
 $ roslaunch agv_explore aibot_bringup.launch livox_hw:=true with_uav:=true

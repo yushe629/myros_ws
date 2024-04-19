@@ -2,8 +2,6 @@
 
 ### Branches:
 - fast_lio_localization: git@github.com:tongtybj/FAST_LIO_LOCALIZATION.git develop/livox_mid360
-- aerial_robot: git@github.com:tongtybj/aerial_robot.git develop/mini_quadrotor/livox_mid360
-
 
 ### Map Localiztion
 
