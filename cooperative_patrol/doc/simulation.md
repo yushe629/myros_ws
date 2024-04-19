@@ -2,7 +2,9 @@
 
 
 ### step1:
+```bash
 $ roslaunch cooperative_patrol simulation.launch
+```
 
 ### step2:
 
