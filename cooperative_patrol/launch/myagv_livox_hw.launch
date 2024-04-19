@@ -29,7 +29,7 @@
   <node pkg="tf" type="static_transform_publisher" name="livox_frame_broadcaster" args="$(arg base_x) 0 $(arg base_z) 0 0 0 1 body base_link 20" />
 
   <!-- uav wire device-->
-  <include file="$(find agv_explore)/launch/uav_wire_motion.launch" if="$(arg with_uav)" >
+  <include file="$(find cooperative_patrol)/launch/uav_wire_motion.launch" if="$(arg with_uav)" >
     <arg name="wire_bias" value="0.05" /> <!-- for vio mode -->
     <arg name="strong_wind_torque" value="150" />
   </include>
@@ -37,7 +37,7 @@
 
 
   <!-- run livox in remote machine -->
-  <!-- <machine name="slam_machine" address="192.168.11.121" env-loader="$(find agv_explore)/env/slam_machine.sh" user="leus" /> -->
+  <!-- <machine name="slam_machine" address="192.168.11.121" env-loader="$(find cooperative_patrol)/env/slam_machine.sh" user="leus" /> -->
 
   <!-- <include file="$(find livox_ros_driver2)/launch_ROS1/msg_MID360.launch" machine="slam_machine"/> -->
 </launch>

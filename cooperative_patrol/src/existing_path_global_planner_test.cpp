@@ -1,4 +1,4 @@
-#include <agv_explore/existing_path_global_planner.h>
+#include <cooperative_patrol/existing_path_global_planner.h>
 
 int main (int argc, char **argv)
 {

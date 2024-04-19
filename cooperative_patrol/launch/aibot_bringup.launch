@@ -14,7 +14,7 @@
 
   <group if ="$(arg simulation)">
 
-    <param name="robot_description" command="xacro $(find agv_explore)/urdf/myagv.urdf.xacro" />
+    <param name="robot_description" command="xacro $(find cooperative_patrol)/urdf/myagv.urdf.xacro" />
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch" >
       <arg name="world_name" value="$(arg world_name)" />
@@ -33,7 +33,7 @@
 
   <group unless ="$(arg simulation)">
     <group if = "$(arg livox_hw)" >
-      <include file="$(find agv_explore)/launch/myagv_livox_hw.launch" >
+      <include file="$(find cooperative_patrol)/launch/myagv_livox_hw.launch" >
         <arg name="with_uav" value="$(arg with_uav)" />
       </include>
     </group>
@@ -77,17 +77,17 @@
   </group>
 
   <!-- Map server -->
-  <arg name="map_file" default="$(find agv_explore)/map/8_326/map-8-326.yaml"/>
+  <arg name="map_file" default="$(find cooperative_patrol)/map/8_326/map-8-326.yaml"/>
   <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find agv_explore)/param/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find agv_explore)/param/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find agv_explore)/param/navigation/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find agv_explore)/param/navigation/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find agv_explore)/param/navigation/base_local_planner_default_params.yaml" command="load" />
-    <rosparam file="$(find agv_explore)/param/navigation/move_base_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/base_local_planner_default_params.yaml" command="load" />
+    <rosparam file="$(find cooperative_patrol)/param/navigation/move_base_params.yaml" command="load" />
   </node>
   <param name="/move_base/global_costmap/obstacle_layer/scan/topic" value="/livox/scan" if = "$(arg livox_hw)" />
   <param name="/move_base/global_costmap/obstacle_layer/scan/min_obstacle_height" value="-0.1" if = "$(arg livox_hw)" />

@@ -1,5 +1,5 @@
-#include <agv_explore/existing_path_global_planner.h>
-#include <agv_explore/a_star.h>
+#include <cooperative_patrol/existing_path_global_planner.h>
+#include <cooperative_patrol/a_star.h>
 
 namespace navfn {
 

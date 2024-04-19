@@ -1,9 +1,9 @@
 
 ## Rviz
-$ rviz -d `rospack find agv_explore`/config/patrol.rviz
+$ rviz -d `rospack find cooperative_patrol`/config/patrol.rviz
 
 ## Record
-$ rosrun agv_explore rosbag_record.sh
+$ rosrun cooperative_patrol rosbag_record.sh
 
 ## Joy for tele-operation
 

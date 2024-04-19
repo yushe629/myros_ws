@@ -2,7 +2,7 @@
 
 
 ### step1:
-$ roslaunch agv_explore simulation.launch
+$ roslaunch cooperative_patrol simulation.launch
 
 ### step2:
 

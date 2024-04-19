@@ -4,8 +4,8 @@
 
   <arg name="waypoint_file" default="simple_waypoints.yaml" />
 
-  <node pkg="agv_explore" type="patrol_motion.py" name="patrol_state_machine" output="screen">
-    <rosparam file="$(find agv_explore)/param/patrol/$(arg waypoint_file)" command="load" />
+  <node pkg="cooperative_patrol" type="patrol_motion.py" name="patrol_state_machine" output="screen">
+    <rosparam file="$(find cooperative_patrol)/param/patrol/$(arg waypoint_file)" command="load" />
     <remap from="uav/start" to="/quadrotor/teleop_command/start"/>
     <remap from="uav/takeoff" to="/quadrotor/teleop_command/takeoff"/>
     <remap from="uav/land" to="/quadrotor/teleop_command/land"/>

@@ -14,7 +14,7 @@
 
 ### step1 @ myagv 
 
-$ roslaunch agv_explore myagv_livox_hw.launch
+$ roslaunch cooperative_patrol myagv_livox_hw.launch
 $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
 
 ### step2 @ uav or livox vim4 

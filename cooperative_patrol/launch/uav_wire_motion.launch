@@ -12,10 +12,10 @@
     <arg name="usb_port" value="$(arg usb_port)" />
   </include>
 
-  <param name="dynamixel_info" value="$(find agv_explore)/config/dynamixel_config.yaml"/>
+  <param name="dynamixel_info" value="$(find cooperative_patrol)/config/dynamixel_config.yaml"/>
 
   <!-- wire motion -->
-  <node pkg="agv_explore" type="uav_wire_motion.py" name="uav_wire_motion" output="screen">
+  <node pkg="cooperative_patrol" type="uav_wire_motion.py" name="uav_wire_motion" output="screen">
     <remap from="uav/cog/odom" to="quadrotor/uav/cog/odom"/>
     <remap from="flight_state" to="quadrotor/flight_state"/>
     <param name="wire_bias" value="$(arg wire_bias)" />
