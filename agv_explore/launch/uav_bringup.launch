@@ -31,7 +31,7 @@
   <param name="/quadrotor/bat_info/low_voltage_thre" value="2"/>
   <param name="/quadrotor/navigation/land_descend_vel" value="-0.1"/>
 
-  <node name="camera" pkg="usb_cam" type="usb_cam_node" output="screen" >
+  <node name="camera" pkg="usb_cam" type="usb_cam_node" output="screen" unless="$(arg sim)" >
     <param name="video_device" value="/dev/video0" />
     <param name="image_width" value="1280" />
     <param name="image_height" value="720" />

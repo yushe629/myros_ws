@@ -1,0 +1,29 @@
+<launch>
+
+  #### AGV ####
+  <include file="$(find agv_explore)/launch/aibot_bringup.launch" >
+    <arg name="simulation" value="true" />
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world" />
+    <arg name="map_file" value="$(find agv_explore)/map/turtlebot3/turtlebot3_gazebo_world_map.yaml" />
+  </include>
+
+  #### UAV ####
+  <include file="$(find agv_explore)/launch/uav_bringup.launch" >
+    <arg name="rm" value="false" />
+    <arg name="sim" value="true" />
+    <arg name="launch_gazebo" default="false" />
+    <arg name="spawn_x" default="-1.87"/>
+    <arg name="spawn_y" default="-1.0"/>
+    <arg name="spawn_z" default="1.0"/>
+  </include>
+
+  ### Patrol ###
+  <include file="$(find agv_explore)/launch/patrol.launch" >
+    <arg name="waypoint_file" value="turtlebot3_gazebo_wp.yaml" />
+    <arg name="sim" value="true" />
+  </include>
+
+  ### rviz ###
+  <node pkg="rviz" name="rviz" type="rviz" args="-d $(find agv_explore)/config/patrol.rviz" />
+
+</launch>

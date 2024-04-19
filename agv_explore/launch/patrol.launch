@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="sim" default="false" />
+
   <arg name="waypoint_file" default="simple_waypoints.yaml" />
 
   <node pkg="agv_explore" type="patrol_motion.py" name="patrol_state_machine" output="screen">
@@ -11,5 +13,7 @@
     <remap from="uav/odom" to="/quadrotor/uav/cog/odom"/>
     <remap from="uav/flight_state" to="/quadrotor/flight_state"/>
     <remap from="uav/control_term" to="/quadrotor/debug/pose/pid"/>
+    <param name="uav/world_frame" value="map" if="$(arg sim)"/>
   </node>
+
 </launch>
