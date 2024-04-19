@@ -9,11 +9,12 @@
     version: master
 
 - git:
-    local-name: aibot_sim
-    uri: https://github.com/tongtybj/aibot_sim.git
-    version: develop/myagv
-
-- git:
     local-name: aibot_description
     uri: https://github.com/tongtybj/aibot_description.git
     version: develop/myagv
+
+# uav wire device
+- git:
+    local-name: dyamixel-workbench
+    uri: https://github.com/tongtybj/dynamixel-workbench.git 
+    viersion: develop/current_based_position_control

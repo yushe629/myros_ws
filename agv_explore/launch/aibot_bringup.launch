@@ -6,15 +6,26 @@
   <arg name="with_uav" default="false" />
 
   <arg name="existing_path" default="false" />
-  <arg name="simulation" default="false" />
 
+  <arg name="simulation" default="false" />
+  <arg name="world_name" default="worlds/empty.world" />
+  <arg name="spawn_x" default="-1.8"/>
+  <arg name="spawn_y" default="-1.0"/>
 
   <group if ="$(arg simulation)">
-    <include file="$(find aibot_sim)/launch/gazebo.launch">
-      <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
-      <arg name="spawn_x" value="-2.0"/>
-      <arg name="spawn_y" value="-1.0"/>
+
+    <param name="robot_description" command="xacro $(find agv_explore)/urdf/myagv.urdf.xacro" />
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" >
+      <arg name="world_name" value="$(arg world_name)" />
     </include>
+
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_agv_model" args="-urdf -model car -x $(arg spawn_x) -y $(arg spawn_y) -param robot_description " />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="100.0" />
+    </node>
+
     <node pkg="fake_localization" name="fake_localization"  type="fake_localization" >
       <remap from="base_pose_ground_truth" to="/odom" />
     </node>
