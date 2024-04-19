@@ -6,7 +6,7 @@ DWAPlannerROS:
   max_vel_x: 0.7
   min_vel_x: -0.7
   max_vel_y: 0.0
-  min_vel_y: -0.9
+  min_vel_y: 0.0
   max_rot_vel: 3.0
   min_rot_vel: 0.3
   acc_lim_x: 1.0
