@@ -8,4 +8,8 @@ $ roslaunch cooperative_patrol simulation.launch
 
 ### step2:
 
-click the "PublihsTopic" in rviz
+click the "Send Topic" in rviz as shown in the figure.
+
+![gazebo](simulation.png)
+
+

@@ -1,44 +1,19 @@
-# Demo of exploration using turtlebot3
+# Demo of cooperative exploration by UAV and AGV
 
 
-## Usage
+## Real Machine
 
-### Simulation
+### Create Map
 
-### SLAM demo
+- [Create Map](doc/create_map.md)
 
-```bash
-roslaunch cooperative_patrol bringup.launch use_teleop:=true
-```
+### Expolration
 
-Use keyboard to control turtlebot3
+- [AGV Site](doc/agv_nav.md)
+- [UAV Site](doc/uav_nav.md)
+- [Local PC Site](doc/local.md)
 
-### AMCL demo
+## Simulation
 
-```bash
-roslaunch cooperative_patrol bringup.launch use_slam:=false use_teleop:=true initial_pose_x:=-2 initial_pose_y:=-0.5
-```
+- [Gazebo](doc/simulation.md)
 
-Use keyboard to control turtlebot3
-
-
-
-
-### Simple explore demo
-
-```bash
-roslaunch cooperative_patrol bringup.launch # bringup gazebo env
-```
-
-In another terminal:
-
-```bash
-rosrun cooperative_patrol simple_explore.py
-```
-
-
-### Gazebo
-
-```bash
- roslaunch cooperative_patrol aibot_bringup.launch simulation:=true map_file:=/home/chou/ros/agv_ws/src/gas_sensing/cooperative_patrol/map/turtlebot3/turtlebot3_gazebo_world_map.yaml
-```
