@@ -16,4 +16,6 @@
     <param name="uav/world_frame" value="map" if="$(arg sim)"/>
   </node>
 
+  <node pkg="smach_viewer" type="smach_viewer.py" name="smach_viewer" output="screen" if="$(arg sim)" />
+
 </launch>
