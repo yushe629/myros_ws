@@ -2,8 +2,8 @@
 
 ### branchs:
 
-- livox_ros_driver: git@github.com:tongtybj/livox_ros_driver2 develop/pub_topic
-- fast_lio: git@github.com:tongtybj/FAST_LIO develop/convert_map
+- livox_ros_driver: https://github.com/tongtybj/livox_ros_driver2.git develop/pub_topic
+- fast_lio: https://github.com/tongtybj/FAST_LIO.git develop/convert_map
 
 #### myagv
 
@@ -36,7 +36,10 @@ $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
 
 ### step4 @ local machine
 
-- close the launch will generate .pcd file under `fast_lio/PCD`, please rename the .pcd file for your usage
+- close the launch will generate `scans.pcd` file under `fast_lio/PCD`. Then convert to pointcloud
+```bash
+$ roslaunch fast_lio pcd2pointcloud.launch file_name:=`rospack find fast_lio`/PCD/scans.pcd headless:=false
+```
 
 - transform the origin frame of pointcloud:
 
